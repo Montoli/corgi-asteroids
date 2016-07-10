@@ -1,0 +1,1 @@
+* Gave AddFromRawData a default implementation.  (No longer pure virtual.)  This means it's no longer a required override.
