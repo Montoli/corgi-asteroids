@@ -16,7 +16,7 @@
 
 namespace corgi {
 
-#define CORGI_VERSION_MAJOR 1
+#define CORGI_VERSION_MAJOR 2
 #define CORGI_VERSION_MINOR 0
 #define CORGI_VERSION_REVISION 0
 

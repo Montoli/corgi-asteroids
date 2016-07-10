@@ -135,11 +135,12 @@
     <ClCompile Include="src\states\main_state.cpp" />
     <ClCompile Include="src\states\state_manager.cpp" />
     <ClCompile Include="src\systems\test_system.cpp" />
+    <ClCompile Include="src\systems\test_system2.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\external\corgi\include\corgi\component.h" />
-    <ClInclude Include="..\external\corgi\include\corgi\component_id_lookup.h" />
-    <ClInclude Include="..\external\corgi\include\corgi\component_interface.h" />
+    <ClInclude Include="..\external\corgi\include\corgi\system.h" />
+    <ClInclude Include="..\external\corgi\include\corgi\system_id_lookup.h" />
+    <ClInclude Include="..\external\corgi\include\corgi\system_interface.h" />
     <ClInclude Include="..\external\corgi\include\corgi\entity.h" />
     <ClInclude Include="..\external\corgi\include\corgi\entity_common.h" />
     <ClInclude Include="..\external\corgi\include\corgi\entity_manager.h" />
@@ -149,6 +150,7 @@
     <ClInclude Include="src\states\main_state.h" />
     <ClInclude Include="src\states\state_manager.h" />
     <ClInclude Include="src\systems\test_system.h" />
+    <ClInclude Include="src\systems\test_system2.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\external\corgi\changelog.txt" />

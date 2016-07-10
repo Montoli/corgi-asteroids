@@ -6,12 +6,10 @@
 
 class StateManager {
 public:
-  void Update(float delta_time);
-  
-  void Render(float delta_time);
+  void Update(double delta_time);
+  void Render(double delta_time);
 
-
-  void PushState(BaseState* new_state);
+   void PushState(BaseState* new_state);
 
   BaseState * GetTopState();
   int PopEndedStates();

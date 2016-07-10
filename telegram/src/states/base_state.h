@@ -6,8 +6,8 @@ class StateManager;
 class BaseState {
 public:
 
-  virtual void Update(float delta_time) {}
-  virtual void Render(float delta_time) {}
+  virtual void Update(double delta_time) {}
+  virtual void Render(double delta_time) {}
 
   virtual void Init() {}
   virtual void Cleanup() {}

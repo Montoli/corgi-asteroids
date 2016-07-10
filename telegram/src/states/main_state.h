@@ -3,13 +3,14 @@
 #include <memory>
 #include "corgi/entity_manager.h"
 #include "systems/test_system.h"
+#include "systems/test_system2.h"
 #include "base_state.h"
 
 class MainState : public BaseState {
 public:
 
-  virtual void Update(float delta_time);
-  virtual void Render(float delta_time) {}
+  virtual void Update(double delta_time);
+  virtual void Render(double delta_time) {}
 
   virtual void Init();
   virtual void Cleanup() {}
@@ -20,6 +21,7 @@ public:
 private:
   corgi::EntityManager entity_manager_;
   TestSystem test_system_;
+  TestSystem2 test_system2_;
 
 };
 

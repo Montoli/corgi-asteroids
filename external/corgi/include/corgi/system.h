@@ -16,8 +16,8 @@
 #define CORGI_COMPONENT_H_
 
 #include <unordered_map>
-#include "corgi/component_id_lookup.h"
-#include "corgi/component_interface.h"
+#include "corgi/system_id_lookup.h"
+#include "corgi/system_interface.h"
 #include "corgi/entity.h"
 #include "corgi/entity_common.h"
 #include "corgi/entity_manager.h"
@@ -29,8 +29,8 @@ namespace corgi {
 /// @addtogroup corgi_component
 /// @{
 ///
-/// @class Component
-/// @brief A Component is an object that encapsulates all data and logic
+/// @class System
+/// @brief A System is an object that encapsulates all data and logic
 /// for Entities of a particular type.
 ///
 /// @note On some of the API, EntityRef& parameters are non-const so that
@@ -40,7 +40,7 @@ namespace corgi {
 /// @tparam T The structure of data that needs to be associated with each
 /// Entity.
 template <typename T>
-class Component : public ComponentInterface {
+class System : public SystemInterface {
  public:
   /// @struct ComponentData
   /// @brief A structure of data that is associated with each Entity.
@@ -91,19 +91,19 @@ class Component : public ComponentInterface {
   /// @typedef EntityIterator
   ///
   /// @brief An iterator to iterate through all of the Entities in the
-  /// Component.
+  /// System.
   typedef typename VectorPool<ComponentData>::Iterator EntityIterator;
 
   /// @typedef value_type
   ///
-  /// @brief The templated data type stored by this Component.
+  /// @brief The templated data type stored by this System.
   typedef T value_type;
 
-  /// @brief Construct a Component without an EntityManager.
-  Component() : entity_manager_(nullptr) {}
+  /// @brief Construct a System without an EntityManager.
+  System() : entity_manager_(nullptr) {}
 
-  /// @brief Destructor for a Component.
-  virtual ~Component() {}
+  /// @brief Destructor for a System.
+  virtual ~System() {}
 
   /// @brief Provides an alternate way to add Entities if you do not
   /// care about the returned data structure, and if you do not feel like
@@ -116,16 +116,16 @@ class Component : public ComponentInterface {
   /// @param[in,out] entity An EntityRef reference used to add an Entity.
   virtual void AddEntityGenerically(EntityRef& entity) { AddEntity(entity); }
 
-  /// @brief Adds an Entity to the list that this Component is tracking.
+  /// @brief Adds an Entity to the list that this System is tracking.
   ///
   /// @param[in,out] entity An EntityRef reference used to add an Entity to the
-  /// list of Entities that this Component keeps track of.
+  /// list of Entities that this System keeps track of.
   /// @param[in] alloc_location An Enum that specifies whether to allocate from
   /// the beginning or end of the memory pool.
   ///
-  /// @return Returns the data structure associated with the Component.
+  /// @return Returns the data structure associated with the System.
   ///
-  /// @note If you have already registered for this Component, this
+  /// @note If you have already registered for this System, this
   /// will just return a reference to the existing data and will not change
   /// anything.
   T* AddEntity(EntityRef& entity, AllocationLocation alloc_location) {
@@ -133,34 +133,35 @@ class Component : public ComponentInterface {
       return GetComponentData(entity);
     }
     // No existing data, so we allocate some and return it:
-    ComponentIndex index = static_cast<ComponentIndex>(
+    SystemIndex index = static_cast<SystemIndex>(
         component_data_.GetNewElement(alloc_location).index());
     component_index_lookup_[entity->entity_id()] = index;
     ComponentData* component_data = component_data_.GetElementData(index);
     component_data->entity = entity;
+    AddSystemDependencies(entity);
     InitEntity(entity);
     return &(component_data->data);
   }
 
-  /// @brief Adds an Entity to the list that this Component is tracking.
+  /// @brief Adds an Entity to the list that this System is tracking.
   ///
   /// @note Entities added through this function allocate from the back of the
   /// memory pool.
   ///
   /// @param[in,out] entity An EntityRef reference used to add an Entity to the
-  /// list of Entities that this Component keeps track of.
+  /// list of Entities that this System keeps track of.
   ///
-  /// @return Returns the data structure associated with the Component.
+  /// @return Returns the data structure associated with the System.
   T* AddEntity(EntityRef& entity) { return AddEntity(entity, kAddToBack); }
 
   /// @brief Removes an Entity from the list of Entities.
   ///
-  /// This is done by marking the Entity as no longer using this Component,
+  /// This is done by marking the Entity as no longer using this System,
   /// calling the destructor on the data, and returning the memory to the
   /// memory pool.
   ///
   /// @param[in,out] entity An EntityRef reference used to remove an Entity
-  /// from the list of Entities that this Component keeps track of.
+  /// from the list of Entities that this System keeps track of.
   virtual void RemoveEntity(EntityRef& entity) {
     // Calling remove when there is no data is generally a sign that
     // something has gone wrong and that something has lost track of which
@@ -174,7 +175,7 @@ class Component : public ComponentInterface {
 
   /// @brief Removes an Entity from the list of Entities.
   ///
-  /// This is done by marking the Entity as no longer using this Component,
+  /// This is done by marking the Entity as no longer using this System,
   /// calling the destructor on the data, and returning the memory to the
   /// memory pool.
   ///
@@ -193,17 +194,17 @@ class Component : public ComponentInterface {
   }
 
   /// @brief Gets an iterator that will iterate over every Entity associated
-  /// with the Component, starting from the beginning.
+  /// with the System, starting from the beginning.
   ///
   /// @return Returns an iterator in the style of std that points to the first
-  /// Entity in the list of all Entities in the Component.
+  /// Entity in the list of all Entities in the System.
   virtual EntityIterator begin() { return component_data_.begin(); }
 
   /// @brief Gets an iterator that points to the end of the list of all entites
-  /// in the Component.
+  /// in the System.
   ///
   /// @return Returns an iterator in the style of std that points to the last
-  /// Entity in the list of all Entities in the Component.
+  /// Entity in the list of all Entities in the System.
   virtual EntityIterator end() { return component_data_.end(); }
 
   /// @brief Updates all Entities. This is normally called, once per frame,
@@ -213,12 +214,12 @@ class Component : public ComponentInterface {
   /// @brief Checks if this component contains any data associated with the
   /// supplied entity.
   virtual bool HasDataForEntity(const EntityRef& entity) {
-    return GetComponentDataIndex(entity) != kInvalidComponentIndex;
+    return GetComponentDataIndex(entity) != kInvalidSystemIndex;
   }
 
   /// @brief Gets the data for a given Entity as a void pointer.
   ///
-  /// @note When using GetComponentDataAsVoid, the calling function is expected
+  /// @note When using GetSystemDataAsVoid, the calling function is expected
   /// to know how to handle the data (since it is returned as a void pointer).
   ///
   /// @warning This pointer is NOT stable in memory. Calls to AddEntity and
@@ -230,13 +231,13 @@ class Component : public ComponentInterface {
   ///
   /// @return Returns the Entity's data as a void pointer, or returns a nullptr
   /// if the data does not exist.
-  virtual void* GetComponentDataAsVoid(const EntityRef& entity) {
+  virtual void* GetSystemDataAsVoid(const EntityRef& entity) {
     return GetComponentData(entity);
   }
 
   /// @brief Gets the data for a given Entity as a const void pointer.
   ///
-  /// @note When using GetComponentDataAsVoid, the calling function is expected
+  /// @note When using GetSystemDataAsVoid, the calling function is expected
   /// to know how to handle the data (since it is returned as a const
   /// void pointer).
   ///
@@ -249,23 +250,23 @@ class Component : public ComponentInterface {
   ///
   /// @return Returns the Entity's data as a const void pointer, or returns a
   /// nullptr if the data does not exist.
-  virtual const void* GetComponentDataAsVoid(const EntityRef& entity) const {
+  virtual const void* GetSystemDataAsVoid(const EntityRef& entity) const {
     return GetComponentData(entity);
   }
 
-  /// @brief Gets the Component data stored at a given index.
+  /// @brief Gets the System data stored at a given index.
   ///
   /// @warning This pointer is NOT stable in memory. Calls to AddEntity and
   /// AddEntityGenerically may force the storage class to resize,
   /// shuffling around the location of this data.
   ///
   /// @param[in] data_index A size_t representing the index of the desired
-  /// Component data.
+  /// System data.
   ///
   /// @return Returns a pointer of the data structure associated with the
-  /// Component data, or returns a nullptr if given an invalid data_index.
+  /// System data, or returns a nullptr if given an invalid data_index.
   T* GetComponentData(size_t data_index) {
-    if (data_index == kInvalidComponentIndex) {
+    if (data_index == kInvalidSystemIndex) {
       return nullptr;
     }
     ComponentData* element_data = component_data_.GetElementData(data_index);
@@ -282,7 +283,7 @@ class Component : public ComponentInterface {
   /// be returned.
   ///
   /// @return Returns the Entity's data as a pointer of the data structure
-  /// associated with the Component data, or returns a nullptr if the data
+  /// associated with the System data, or returns a nullptr if the data
   /// does not exist.
   T* GetComponentData(const EntityRef& entity) {
     size_t data_index = GetComponentDataIndex(entity);
@@ -292,19 +293,19 @@ class Component : public ComponentInterface {
     return GetComponentData(data_index);
   }
 
-  /// @brief Gets the Component data stored at a given index.
+  /// @brief Gets the System data stored at a given index.
   ///
   /// @warning This pointer is NOT stable in memory. Calls to AddEntity and
   /// AddEntityGenerically may force the storage class to resize,
   /// shuffling around the location of this data.
   ///
   /// @param[in] data_index A size_t representing the index of the desired
-  /// Component data.
+  /// System data.
   ///
   /// @return Returns a const pointer of the data structure associated with the
-  /// Component data, or returns a nullptr if given an invalid data_index.
+  /// System data, or returns a nullptr if given an invalid data_index.
   const T* GetComponentData(size_t data_index) const {
-    return const_cast<Component*>(this)->GetComponentData(data_index);
+    return const_cast<System*>(this)->GetComponentData(data_index);
   }
 
   /// @brief Gets the data for a given Entity.
@@ -317,31 +318,31 @@ class Component : public ComponentInterface {
   /// be returned.
   ///
   /// @return Returns the Entity's data as a const pointer of the data
-  /// structure associated with the Component data, or returns a nullptr
+  /// structure associated with the System data, or returns a nullptr
   /// if the data does not exist.
   const T* GetComponentData(const EntityRef& entity) const {
-    return const_cast<Component*>(this)->GetComponentData(entity);
+    return const_cast<System*>(this)->GetComponentData(entity);
   }
 
-  /// @brief Clears all tracked Component data.
+  /// @brief Clears all tracked System data.
   void virtual ClearComponentData() {
     for (auto iter = component_data_.begin(); iter != component_data_.end();
          iter = RemoveEntity(iter)) {
     }
   }
 
-  /// @brief A utility function for retrieving the Component data for an
-  /// Entity from a specific Component.
+  /// @brief A utility function for retrieving the System data for an
+  /// Entity from a specific System.
   ///
-  /// @tparam ComponentDataType The data type of the Component whose data
+  /// @tparam ComponentDataType The data type of the System whose data
   /// is returned for the given Entity.
   ///
-  /// @param[in] entity An EntityRef reference to the Entity whose Component
+  /// @param[in] entity An EntityRef reference to the Entity whose System
   /// data should be returned.
   ///
-  /// @return Returns a pointer to the data for the Component of the given
+  /// @return Returns a pointer to the data for the System of the given
   /// Entity or returns null if the Entity is not registered with the
-  /// Component.
+  /// System.
   template <typename ComponentDataType>
   ComponentDataType* Data(const EntityRef& entity) {
     return entity_manager_->GetComponentData<ComponentDataType>(entity);
@@ -350,60 +351,122 @@ class Component : public ComponentInterface {
   /// @brief A utility function for checking if an entity is registered with
   /// a particular component.
   ///
-  /// @tparam ComponentDataType The data type of the Component to be checked
+  /// @tparam ComponentDataType The data type of the System to be checked
   /// for registration.
   ///
-  /// @param[in] entity An EntityRef reference to the Entity whose Component
+  /// @param[in] entity An EntityRef reference to the Entity whose System
   /// data is checked.
   ///
-  /// @return Returns true if the entity has been registered with the Component,
+  /// @return Returns true if the entity has been registered with the System,
   /// false otherwise.
   template <typename ComponentDataType>
   bool IsRegisteredWithComponent(const EntityRef& entity) {
     return entity_manager_
-        ->GetComponent(entity_manager_->GetComponentId<ComponentDataType>())
+        ->GetSystem(entity_manager_->GetComponentId<ComponentDataType>())
         ->HasDataForEntity(entity);
   }
 
-  /// @brief A utility function for retrieving the Component data for an
-  /// Entity from a specific Component.
+  /// @brief A utility function for retrieving the System data for an
+  /// Entity from a specific System.
   ///
-  /// @tparam ComponentDataType The data type of the Component whose data
+  /// @tparam ComponentDataType The data type of the System whose data
   /// is returned for the given Entity.
   ///
-  /// @param[in] entity An EntityRef reference to the Entity whose Component
+  /// @param[in] entity An EntityRef reference to the Entity whose System
   /// data should be returned.
   ///
-  /// @return Returns a pointer to the data for the Component of the given
+  /// @return Returns a pointer to the data for the System of the given
   /// Entity or returns null if the Entity is not registered with the
-  /// Component.
+  /// System.
   template <typename ComponentDataType>
   ComponentDataType* Data(const EntityRef& entity) const {
     return entity_manager_->GetComponentData<ComponentDataType>(entity);
   }
 
   /// @brief A utility function for retrieving a reference to a specific
-  /// Component object, by type.
+  /// System object, by type.
   ///
-  /// @tparam ComponentDataType The data type of the Component.
+  /// @tparam ComponentDataType The data type of the System.
   ///
-  /// @return Returns a pointer to the data for a specific Component.
+  /// @return Returns a pointer to the data for a specific System.
   template <typename ComponentDataType>
-  ComponentDataType* GetComponent() {
-    return static_cast<ComponentDataType*>(entity_manager_->GetComponent(
-        ComponentIdLookup<ComponentDataType>::component_id));
+  ComponentDataType* GetSystem() {
+    return static_cast<ComponentDataType*>(entity_manager_->GetSystem(
+        SystemIdLookup<ComponentDataType>::system_id));
   }
 
   // Virtual methods we inherited from component_interface:
 
   /// @brief Override this function with code that should be executed when
-  /// the Component is added to the EntityManager. (This typically
+  /// the System is added to the EntityManager. (This typically
   /// happens once, at the beginning of the game before any Entities are
   /// added.)
   virtual void Init() {}
 
+  /// @brief Invoked by EntityManager::FinalizeSystemList, once all systems
+  // have been registered.  This is the place for systems to declare any
+  /// dependencies they have on other systems, if any. (Via System::DependOn)
+  virtual void DeclareDependencies() {}
+
+  /// @brief A utility function for declaring a dependency on another system.
+  ///
+  /// @tparam ComponentDataType The data type of the System to depend on.
+  template <typename SystemType>
+  void DependOn(SystemDependencyType dependency_type) {
+    DependOn(SystemIdLookup<SystemType>::system_id, dependency_type);
+  }
+
+  
+  /// @brief A utility function for declaring a dependency on another system.
+  ///
+  /// @tparam ComponentDataType The data type of the System to depend on.
+  virtual void DependOn(SystemId system_id, SystemDependencyType dependency_type) {
+    if (dependency_type == kMustHaveComponent
+      || dependency_type == kMustHaveComponentAndExecuteAfter
+      || dependency_type == kMustHaveComponentAndExecuteBefore) {
+      component_dependencies_.push_back(system_id);
+    }
+
+    if (dependency_type == kMustExecuteAfter
+      || dependency_type == kMustHaveComponentAndExecuteAfter) {
+      execute_dependencies_.push_back(system_id);
+    }
+
+    if (dependency_type == kMustExecuteBefore
+      || dependency_type == kMustHaveComponentAndExecuteBefore) {
+
+      assert(entity_manager_);
+      assert(entity_manager_->is_system_list_final());
+      SystemInterface* system = entity_manager_->GetSystem(system_id);
+      assert(system);
+      // If we need to make this system exceute before something else, then
+      // we just add ourselves as a dependency to the target.  This way, the
+      // dependency tree is entirely one-direction.
+      system->DependOn(SystemIdLookup<T>::system_id, dependency_type == kMustExecuteBefore
+                          ? kMustExecuteAfter 
+                          : kMustHaveComponentAndExecuteAfter);
+    }
+  }
+
+  /// @brief A utility function for registering an entity with all systems that
+  /// this system depends on components from.  Will do nothing if it already has
+  /// some or all of these components.
+  ///
+  /// @tparam entity The entity to add components to.
+  void AddSystemDependencies(EntityRef& entity) {
+    // Assert if we haven't finalized the system list yet...
+    assert(entity_manager_);
+    assert(entity_manager_->is_system_list_final());
+
+    for (size_t i = 0; i < component_dependencies_.size(); i++) {
+      SystemInterface* system = entity_manager_->GetSystem(component_dependencies_[i]);
+      assert(system);
+      system->AddEntityGenerically(entity);
+    }
+  }
+
   /// @brief Override this function with code that should be executed when an
-  /// Entity is added to the Component.
+  /// Entity is added to the System.
   virtual void InitEntity(EntityRef& /*entity*/) {}
 
   /// @brief Creates and populates an Entity from raw data. Components that want
@@ -426,39 +489,39 @@ class Component : public ComponentInterface {
   }
 
   /// @brief Override this function with any code that executes when this
-  /// Component is removed from the EntityManager. (i.e. Usually when the
+  /// System is removed from the EntityManager. (i.e. Usually when the
   /// game/state is over and everything is shutting down.)
   virtual void Cleanup() {}
 
   /// @brief Override this function with any code that needs to be executed
-  /// when an Entity is removed from this Component.
+  /// when an Entity is removed from this System.
   virtual void CleanupEntity(EntityRef& /*entity*/) {}
 
-  /// @brief Set the EntityManager for this Component.
+  /// @brief Set the EntityManager for this System.
   ///
   /// @note The EntityManager is used as the main point of contact
   /// for Components that need to talk to other things.
   ///
   /// @param[in] entity_manager A pointer to an EntityManager to associate
-  /// with this Component.
+  /// with this System.
   virtual void SetEntityManager(EntityManager* entity_manager) {
     entity_manager_ = entity_manager;
   }
 
-  /// @brief Get the ID for this Component.
+  /// @brief Get the ID for this System.
   ///
-  /// @return Returns the Component ID for this Component.
-  static ComponentId GetComponentId() {
-    return static_cast<ComponentId>(ComponentIdLookup<T>::component_id);
+  /// @return Returns the System ID for this System.
+  static SystemId GetComponentId() {
+    return static_cast<SystemId>(SystemIdLookup<T>::system_id);
   }
 
-  /// @brief Sets the Component ID on the data type.
+  /// @brief Sets the System ID on the data type.
   ///
   /// @note This is usually only called by the EntityManager.
   ///
-  /// @param[in] id The Component ID to set on the data type.
-  virtual void SetComponentIdOnDataType(ComponentId id) {
-    ComponentIdLookup<T>::component_id = id;
+  /// @param[in] id The System ID to set on the data type.
+  virtual void SetSystemIdOnDataType(SystemId id) {
+    SystemIdLookup<T>::system_id = id;
   }
 
  private:
@@ -469,36 +532,43 @@ class Component : public ComponentInterface {
   /// removed and may need to be cleaned up.
   void RemoveEntityInternal(EntityRef& entity) { CleanupEntity(entity); }
 
+  /// @brief : List of systems that we depend on the components of:
+  std::vector<corgi::SystemId> component_dependencies_;
+
+  /// @brief : List of systems that we depend on having updated first,
+  /// before this system updates.
+  std::vector<corgi::SystemId> execute_dependencies_;
+
  protected:
-  /// @brief Get the index of the Component data for a given Entity.
+  /// @brief Get the index of the System data for a given Entity.
   ///
   /// @param[in] entity An EntityRef reference to the Entity whose data
   /// index will be returned.
   ///
   /// @return Returns a size_t corresponding to the index of the
-  /// Component data, or kInvalidComponentIndex if no data could be found.
+  /// System data, or kInvalidSystemIndex if no data could be found.
   size_t GetComponentDataIndex(const EntityRef& entity) const {
     auto result = component_index_lookup_.find(entity->entity_id());
     return (result != component_index_lookup_.end()) ? result->second
-                                                     : kInvalidComponentIndex;
+                                                     : kInvalidSystemIndex;
   }
 
   /// @var component_data_
   ///
-  /// @brief Storage for all of the data for the Component.
+  /// @brief Storage for all of the data for the System.
   VectorPool<ComponentData> component_data_;
 
   /// @var entity_manager_
   ///
-  /// @brief A pointer to the EntityManager for this Component. This is the
+  /// @brief A pointer to the EntityManager for this System. This is the
   /// main point of contact for Components that need to talk to other things.
   EntityManager* entity_manager_;
 
   /// @var component_index_lookup_
   ///
-  /// @brief A map, for translating unique entity IDs into vectorpool
+  /// @brief A map for translating unique entity IDs into vectorpool
   /// indexes.
-  std::unordered_map<EntityIdType, ComponentIndex> component_index_lookup_;
+  std::unordered_map<EntityIdType, SystemIndex> component_index_lookup_;
 };
 /// @}
 

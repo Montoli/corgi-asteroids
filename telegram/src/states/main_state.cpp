@@ -5,15 +5,18 @@
 void MainState::Init() {
   printf("hello world!\n");
   corgi::EntityRef entity = entity_manager_.AllocateNewEntity();
-  entity_manager_.RegisterComponent(&test_system_);
-  test_system_.AddEntity(entity);
-  //entity_manager_.AddEntityToComponent(entity);
+  entity_manager_.RegisterSystem(&test_system_);
+  entity_manager_.RegisterSystem(&test_system2_);
+  entity_manager_.FinalizeSystemList();
+
+  test_system2_.AddEntity(entity);
+  //entity_manager_.AddEntityToSystem(entity);
 }
 
 
-void MainState::Update(float delta_time) {
+void MainState::Update(double delta_time) {
 
-  entity_manager_.UpdateComponents(delta_time);
+  entity_manager_.UpdateSystems(delta_time);
 
   SDL_Event event;
 

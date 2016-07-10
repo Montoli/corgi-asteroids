@@ -25,49 +25,49 @@ namespace corgi {
 /// @{
 ///
 
-/// @var ComponentId
+/// @var SystemId
 ///
-/// @brief This represents the ID of a Component.
+/// @brief This represents the ID of a System.
 ///
 /// @note Depending on kMaxComponentCount, this value is either an uint8_t,
 /// uint16_t, or uint32_t. (However, if you need an uint32_t, you are
 /// probably doing something odd.)
 /// @{
-typedef uint16_t ComponentId;
+typedef uint16_t SystemId;
 /// @}
 
-/// @var kInvalidComponent
+/// @var kInvalidSystem
 ///
-/// @brief A sentinel value to represent an invalid Component.
+/// @brief A sentinel value to represent an invalid System.
 ///
-/// @note Component IDs start at 1.
-const ComponentId kInvalidComponent = static_cast<ComponentId>(-1);
+/// @note System IDs start at 1.
+const SystemId kInvalidSystem = static_cast<SystemId>(-1);
 
 /// @typedef WorldTime
 ///
 /// @brief A typedef that represents time in the game.
-typedef int WorldTime;
+typedef double WorldTime;
 
 /// @cond CORGI_INTERNAL
 const int kMillisecondsPerSecond = 1000;
 /// @endcond
 
-/// @typedef ComponentIndex
+/// @typedef SystemIndex
 ///
-/// @brief A ComponentIndex is a value used to represent the location of a piece
+/// @brief A SystemIndex is a value used to represent the location of a piece
 /// of ComponentData, normally inside of a VectorPool.
-typedef uint16_t ComponentIndex;
+typedef uint16_t SystemIndex;
 
 /// @var kUnusedComponentIndex
 ///
-/// @brief A sentinel value to represent an invalid Component.
+/// @brief A sentinel value to represent an invalid System.
 ///
 /// Since all Entities contain an array corresponding to every
-/// Component in the system, this value is used as a default value
-/// to indicate that a specific Component is not registered with
+/// System they know about, this value is used as a default value
+/// to indicate that a specific System is not registered with
 /// a given Entity.
-static const ComponentIndex kInvalidComponentIndex =
-    static_cast<ComponentIndex>(-1);
+static const SystemIndex kInvalidSystemIndex =
+    static_cast<SystemIndex>(-1);
 
 /// @typedef EntityIdType
 ///
@@ -85,7 +85,17 @@ typedef uint16_t EntityIdType;
 /// uninitialized values, or to indicate a null return value.
 static const EntityIdType kInvalidEntityId = static_cast<EntityIdType>(-1);
 
-
+/// @enum SystemDependency
+///
+/// @brief `Various ways that systems depend on each other.
+enum SystemDependencyType {
+  kNoDependency = 0,
+  kMustExecuteBefore,
+  kMustExecuteAfter,
+  kMustHaveComponent,
+  kMustHaveComponentAndExecuteBefore,
+  kMustHaveComponentAndExecuteAfter,
+};
 
 /// @}
 

@@ -1,19 +1,21 @@
 #ifndef TEST_SYSTEM_H
 #define TEST_SYSTEM_H
-#include "corgi/component.h"
+#include "corgi/system.h"
 
 struct TestData {
   int num = 42;
 };
 
-
-class TestSystem : public corgi::Component<TestData> {
+class TestSystem : public corgi::System<TestData> {
 public:
 
 virtual void UpdateAllEntities(corgi::WorldTime delta_time);
+
+virtual void InitEntity(corgi::EntityRef& entity);
+
 };
 
-CORGI_REGISTER_COMPONENT(TestData, TestSystem)
+CORGI_REGISTER_SYSTEM(TestData, TestSystem)
 
 
 #endif // TEST_SYSTEM_H

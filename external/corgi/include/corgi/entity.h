@@ -26,7 +26,7 @@ namespace corgi {
 /// @class Entity
 ///
 /// @brief The basic Entity class for CORGI. It contains an array
-/// of index values, which are used by Components for tracking their data
+/// of index values, which are used by Systems for tracking their data
 /// associated with an Entity. It also contains a boolean for tracking if
 /// this Entity has been marked for deletion.
 class Entity {

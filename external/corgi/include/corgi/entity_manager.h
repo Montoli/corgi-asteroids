@@ -15,8 +15,8 @@
 #ifndef CORGI_ENTITY_MANAGER_H_
 #define CORGI_ENTITY_MANAGER_H_
 
-#include "corgi/component_id_lookup.h"
-#include "corgi/component_interface.h"
+#include "corgi/system_id_lookup.h"
+#include "corgi/system_interface.h"
 #include "corgi/entity.h"
 #include "corgi/entity_common.h"
 #include "corgi/vector_pool.h"
@@ -45,7 +45,7 @@ namespace corgi {
 typedef VectorPool<Entity>::VectorPoolReference EntityRef;
 
 class EntityFactoryInterface;
-class ComponentInterface;
+class SystemInterface;
 
 /// @class EntityManager
 /// @brief The EntityManager is the code that manages all
@@ -71,113 +71,113 @@ class EntityManager {
   /// @brief This is used to track all Entities stored by the EntityManager.
   typedef VectorPool<Entity> EntityStorageContainer;
 
-  /// @brief Helper function for marshalling data from a Component.
+  /// @brief Helper function for marshalling data from a System.
   ///
-  /// @tparam T The data type of the Component data to be returned.
+  /// @tparam T The data type of the System data to be returned.
   ///
   /// @param[in] entity The Entity associated with the desired data.
   ///
-  /// @return Returns a pointer to the Component data, or returns
+  /// @return Returns a pointer to the System data, or returns
   /// a nullptr if no such data exists.
   template <typename T>
   T* GetComponentData(const EntityRef& entity) {
     return static_cast<T*>(
-        GetComponentDataAsVoid(entity, ComponentIdLookup<T>::component_id));
+        GetSystemDataAsVoid(entity, SystemIdLookup<T>::system_id));
   }
 
-  /// @brief A helper function for marshalling data from a Component.
+  /// @brief A helper function for marshalling data from a System.
   ///
-  /// @tparam T The data type of the Component data to be returned.
+  /// @tparam T The data type of the System data to be returned.
   ///
   /// @param[in] entity The Entity associated with the desired data.
   ///
-  /// @return Returns a const pointer to the Component data, or returns
+  /// @return Returns a const pointer to the System data, or returns
   /// a nullptr if no such data exists.
   template <typename T>
   const T* GetComponentData(const EntityRef& entity) const {
     return static_cast<const T*>(
-        GetComponentDataAsVoid(entity, ComponentIdLookup<T>::component_id));
+        GetSystemDataAsVoid(entity, SystemIdLookup<T>::system_id));
   }
 
-  /// @brief A helper function for getting a particular Component, given
-  /// the Component's data type.
+  /// @brief A helper function for getting a particular System, given
+  /// the System's data type.
   ///
-  /// @note Asserts if the Component does not exist.
+  /// @note Asserts if the System does not exist.
   ///
-  /// @tparam T The data type of the Component to be returned.
+  /// @tparam T The data type of the System to be returned.
   ///
-  /// @return Returns a pointer to the Component given its data type.
+  /// @return Returns a pointer to the System given its data type.
   template <typename T>
-  T* GetComponent() {
-    ComponentId id =
-        static_cast<ComponentId>(ComponentIdLookup<T>::component_id);
-    assert(id != kInvalidComponent);
-    assert(id < components_.size());
-    return static_cast<T*>(components_[id]);
+  T* GetSystem() {
+    SystemId id =
+        static_cast<SystemId>(SystemIdLookup<T>::system_id);
+    assert(id != kInvalidSystem);
+    assert(id < systems_.size());
+    return static_cast<T*>(systems_[id]);
   }
 
-  /// @brief A helper function for getting a particular Component, given
-  /// the Component's data type.
+  /// @brief A helper function for getting a particular System, given
+  /// the System's data type.
   ///
-  /// @note Asserts if the Component does not exist.
+  /// @note Asserts if the System does not exist.
   ///
-  /// @tparam T The data type of the Component to be returned.
+  /// @tparam T The data type of the System to be returned.
   ///
-  /// @return Returns a const pointer to the Component given its datatype.
+  /// @return Returns a const pointer to the System given its datatype.
   template <typename T>
-  const T* GetComponent() const {
-    ComponentId id =
-        static_cast<ComponentId>(ComponentIdLookup<T>::component_id);
-    assert(id != kInvalidComponent);
-    assert(id < components_.size());
-    return static_cast<const T*>(components_[id]);
+  const T* GetSystem() const {
+    SystemId id =
+        static_cast<SystemId>(SystemIdLookup<T>::system_id);
+    assert(id != kInvalidSystem);
+    assert(id < systems_.size());
+    return static_cast<const T*>(systems_[id]);
   }
 
-  /// @brief A helper function for adding a Component to an Entity, given
+  /// @brief A helper function for adding a System to an Entity, given
   /// its data type.
   ///
-  /// @note Asserts if the Component does not exist.
+  /// @note Asserts if the System does not exist.
   ///
-  /// @tparam T The data type of the Component that should have the Entity
+  /// @tparam T The data type of the System that should have the Entity
   /// added to it.
   ///
   /// @param[in] entity An EntityRef that points to the Entity that is being
-  /// added to the Component.
+  /// added to the System.
   template <typename T>
-  void AddEntityToComponent(EntityRef entity) {
-    ComponentId id =
-        static_cast<ComponentId>(ComponentIdLookup<T>::component_id);
-    assert(id != kInvalidComponent);
-    assert(id < components_.size());
-    AddEntityToComponent(entity, id);
+  void AddEntityToSystem(EntityRef entity) {
+    SystemId id =
+        static_cast<SystemId>(SystemIdLookup<T>::system_id);
+    assert(id != kInvalidSystem);
+    assert(id < systems_.size());
+    AddEntityToSystem(entity, id);
   }
 
-  /// @brief A helper function for getting a particular Component, given the
+  /// @brief A helper function for getting a particular System, given the
   /// component ID.
   ///
-  /// @param[in] id The component ID for the desired Component.
+  /// @param[in] id The component ID for the desired System.
   ///
   /// @note Asserts if the id is less than kMaxComponentCount.
   ///
-  /// @return Returns a pointer to the Component at the given id, which
-  /// inherits from the ComponentInterface.
-  inline ComponentInterface* GetComponent(ComponentId id) {
-    assert(id < components_.size());
-    return components_[id];
+  /// @return Returns a pointer to the System at the given id, which
+  /// inherits from the SystemInterface.
+  inline SystemInterface* GetSystem(SystemId id) {
+    assert(id < systems_.size());
+    return systems_[id];
   }
 
-  /// @brief A helper function for getting a particular Component, given a
+  /// @brief A helper function for getting a particular System, given a
   /// component ID.
   ///
-  /// @param[in] id The component ID for the desired Component.
+  /// @param[in] id The component ID for the desired System.
   ///
   /// @note Asserts if the id is less than kMaxComponentCount.
   ///
-  /// @return Returns a const pointer to the Component at the given id,
-  /// which inherits from the ComponentInterface.
-  inline const ComponentInterface* GetComponent(ComponentId id) const {
-    assert(id < components_.size());
-    return components_[id];
+  /// @return Returns a const pointer to the System at the given id,
+  /// which inherits from the SystemInterface.
+  inline const SystemInterface* GetSystem(SystemId id) const {
+    assert(id < systems_.size());
+    return systems_[id];
   }
 
   /// @brief Returns the number of components that have been registered
@@ -185,16 +185,16 @@ class EntityManager {
   ///
   /// @return The total number of components that are currently registered
   /// with the entity manager.
-  inline size_t ComponentCount() const { return components_.size(); }
+  inline size_t ComponentCount() const { return systems_.size(); }
 
-  /// @brief A helper function to get the component ID for a given Component.
+  /// @brief A helper function to get the component ID for a given System.
   ///
-  /// @tparam T The data type of the Component whose ID should be returned.
+  /// @tparam T The data type of the System whose ID should be returned.
   ///
-  /// @return Returns the component ID for a given Component.
+  /// @return Returns the component ID for a given System.
   template <typename T>
-  ComponentId GetComponentId() {
-    return ComponentIdLookup<T>::component_id;
+  SystemId GetComponentId() {
+    return SystemIdLookup<T>::system_id;
   }
 
   /// @brief Allocates a new Entity (that is registered with no Components).
@@ -203,7 +203,7 @@ class EntityManager {
   EntityRef AllocateNewEntity();
 
   /// @brief Deletes an Entity by removing it from the EntityManager's list and
-  /// clearing any Component data associated with it.
+  /// clearing any System data associated with it.
   ///
   /// @note Deletion is deferred until the end of the frame. If you want to
   /// delete something instantly, use DeleteEntityImmediately.
@@ -222,26 +222,32 @@ class EntityManager {
   /// immediately deleted.
   void DeleteEntityImmediately(EntityRef entity);
 
-  /// @brief Registers a new Component with the EntityManager.
+  /// @brief Registers a new System with the EntityManager.
   ///
-  /// @tparam T The data type of the Component that is being registered with the
+  /// @tparam T The data type of the System that is being registered with the
   /// EntityManager.
   ///
-  /// @param[in] new_component A Component to be registered with to the
+  /// @param[in] new_system A System to be registered with to the
   /// EntityManager.
   ///
-  /// @note The new_component must inherit from the ComponentInterface.
+  /// @note The new_system must inherit from the SystemInterface.
   ///
-  /// @return Returns the component ID for the new Component.
+  /// @return Returns the system ID for the new System.
   template <typename T>
-  ComponentId RegisterComponent(T* new_component) {
-    static_assert(std::is_base_of<ComponentInterface, T>::value,
-                  "'new_component' must inherit from ComponentInterface");
-    ComponentId component_id = static_cast<ComponentId>(components_.size());
-    ComponentIdLookup<T>::component_id = component_id;
-    RegisterComponentHelper(new_component, component_id);
-    return component_id;
+  SystemId RegisterSystem(T* new_system) {
+    static_assert(std::is_base_of<SystemInterface, T>::value,
+                  "'new_system' must inherit from SystemInterface");
+    SystemId system_id = static_cast<SystemId>(systems_.size());
+    SystemIdLookup<T>::system_id = system_id;
+    RegisterSystemHelper(new_system, system_id);
+    return system_id;
   }
+
+  /// @brief Finalizes the list of systems and the dependency graph.
+  ///
+  /// @note Further calls to Register System will fail if called after
+  /// FinalizeSystemList
+  void FinalizeSystemList();
 
   /// @brief Removes all Components for an Entity, destroying any data
   /// associated with it.
@@ -250,14 +256,14 @@ class EntityManager {
   ///
   /// @param[in] entity An EntityRef that points to the Entity whose Components
   /// should be removed.
-  void RemoveAllComponents(EntityRef entity);
+  void RemoveAllSystems(EntityRef entity);
 
   /// @brief Iterates through all the registered Components and causes them to
   /// update.
   ///
   /// @param[in] delta_time A WorldTime that represents the timestep since
   /// the last update.
-  void UpdateComponents(WorldTime delta_time);
+  void UpdateSystems(WorldTime delta_time);
 
   /// @brief Clears all data from all Components, empties the list
   /// of Components themselves, and then empties the list of Entities.
@@ -302,71 +308,76 @@ class EntityManager {
   /// @return Returns an EntityRef that points to the newly created Entity.
   EntityRef CreateEntityFromData(const void* data);
 
-  /// @brief Registers an Entity with a Component. This causes the Component
+  /// @brief Registers an Entity with a System. This causes the System
   /// to allocate data for the Entity and includes the Entity in that
-  /// Component's update routines.
+  /// System's update routines.
   ///
   /// @param[in] entity An EntityRef that points to the Entity that should be
-  /// registered with the Component.
-  /// @param[in] component_id The component ID of the Component that should
+  /// registered with the System.
+  /// @param[in] system_id The component ID of the System that should
   /// be registered with the Entity.
-  void AddEntityToComponent(EntityRef entity, ComponentId component_id);
+  void AddEntityToSystem(EntityRef entity, SystemId system_id);
 
   /// @brief Deletes all the Entities that are marked for deletion.
   ///
   /// @warning Do NOT call this function during any form of Entity update!
   void DeleteMarkedEntities();
 
+  /// @brief Boolean that tracks whether the list of systems has been finalized.
+  /// (via FinalizeSystemList)  Once FinalizeSystemList has been called, entities are
+  /// no longer allowed to change their dependencies.
+  bool is_system_list_final() { return is_system_list_final_; }
+
  private:
-  /// @brief Handles the majority of the work for registering a Component (
+  /// @brief Handles the majority of the work for registering a System (
   /// aside from some of the template stuff). In particular, it verifies that
-  /// the request ID is not already in use, puts a pointer to the new Component
-  /// in our components_ array, sets the starting variables, and performs the
-  /// initialization on the Component.
+  /// the request ID is not already in use, puts a pointer to the new System
+  /// in our systems_ array, sets the starting variables, and performs the
+  /// initialization on the System.
   ///
-  /// @param[in] new_component A pointer to a class that inherits from the
-  /// ComponentInterface, which will be registered with the component_id.
-  /// @param[in] component_id The component ID to register with the
-  /// new_component.
-  void RegisterComponentHelper(ComponentInterface* new_component,
-                               ComponentId component_id);
+  /// @param[in] new_system A pointer to a class that inherits from the
+  /// SystemInterface, which will be registered with the system_id.
+  /// @param[in] system_id The component ID to register with the
+  /// new_system.
+  void RegisterSystemHelper(SystemInterface* new_component,
+                               SystemId system_id);
 
   /// @brief Given a component ID and an Entity, returns all data associated
-  /// with that Entity from the given Component.
+  /// with that Entity from the given System.
   ///
   /// @note This function will assert if the inputs are not valid. (e.g. The
-  /// Entity is no longer active, or the Component is invalid.)
+  /// Entity is no longer active, or the System is invalid.)
   ///
   /// @param[in] entity The Entity associated with the desired data.
-  /// @param[in] component_id The component ID associated with the desired
+  /// @param[in] system_id The component ID associated with the desired
   /// data.
   ///
   /// @return Returns the data as a void pointer.
   ///
   /// @note The caller is expected to know how to interpret the data, since it
-  /// is returned as a void pointer. Typically a Component is registered with a
-  /// struct (or class) of Component data, however this function returns the
-  /// data as a void pointer, rather than a specific Component data type.
-  void* GetComponentDataAsVoid(EntityRef entity, ComponentId component_id);
+  /// is returned as a void pointer. Typically a System is registered with a
+  /// struct (or class) of System data, however this function returns the
+  /// data as a void pointer, rather than a specific System data type.
+  void* GetSystemDataAsVoid(EntityRef entity, SystemId system_id);
 
   /// @brief Given a component ID and an Entity, returns all data associated
-  /// with that Entity from the given Component.
+  /// with that Entity from the given System.
   ///
   /// @note This function will assert if the inputs are not valid. (e.g. The
-  /// Entity is no longer active, or the Component is invalid.)
+  /// Entity is no longer active, or the System is invalid.)
   ///
   /// @param[in] entity The Entity associated with the desired data.
-  /// @param[in] component_id The component ID associated with the desired
+  /// @param[in] system_id The component ID associated with the desired
   /// data.
   ///
   /// @return Returns the data as a void pointer.
   ///
   /// @note The caller is expected to know how to interpret the data, since it
-  /// is returned as a void pointer. Typically a Component is registered with a
-  /// struct (or class) of Component data, however this function returns the
-  /// data as a void pointer, rather than a specific Component data type.
-  const void* GetComponentDataAsVoid(EntityRef entity,
-                                     ComponentId component_id) const;
+  /// is returned as a void pointer. Typically a System is registered with a
+  /// struct (or class) of System data, however this function returns the
+  /// data as a void pointer, rather than a specific System data type.
+  const void* GetSystemDataAsVoid(EntityRef entity,
+                                     SystemId system_id) const;
 
   /// @var entities_
   ///
@@ -374,11 +385,11 @@ class EntityManager {
   /// EntityManager.
   EntityStorageContainer entities_;
 
-  /// @var components_
+  /// @var systems_
   ///
   /// @brief All the Components that are tracked by the system, and are
   /// ready to have Entities added to them.
-  std::vector<ComponentInterface*> components_;
+  std::vector<SystemInterface*> systems_;
 
   /// @var entities_to_delete_
   ///
@@ -397,6 +408,13 @@ class EntityManager {
   /// @note Provided by the calling program.
   EntityFactoryInterface* entity_factory_;
 
+  /// @var is_system_list_final_
+  ///
+  /// @brief Boolean that tracks whether the list of systems has been finalized.
+  /// (via FinalizeSystemList)  Once FinalizeSystemList has been called, entities are
+  /// no longer allowed to change their dependencies.
+  bool is_system_list_final_;
+
   // Current version of the Corgi Entity Library.
   const CorgiVersion* version_;
 };
@@ -411,7 +429,7 @@ class EntityFactoryInterface {
   virtual ~EntityFactoryInterface() {}
 
   /// @brief Creates an Entity with a given EntityManager, registers it
-  /// with all Components specified, and populates the Component data.
+  /// with all Components specified, and populates the System data.
   ///
   /// @param[in] data A void pointer to the data used to create
   /// the new Entity.

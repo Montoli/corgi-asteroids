@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include <assert.h>
-#include "corgi/component_id_lookup.h"
+#include "corgi/system_id_lookup.h"
 #include "corgi/entity_manager.h"
 #include "corgi/version.h"
 
@@ -49,74 +49,85 @@ void EntityManager::DeleteEntity(EntityRef entity) {
 // This deletes the entity instantly.  You should generally use the regular
 // DeleteEntity unless you have a particuarly good reason to need it instantly.
 void EntityManager::DeleteEntityImmediately(EntityRef entity) {
-  RemoveAllComponents(entity);
+  RemoveAllSystems(entity);
   entities_.FreeElement(entity);
 }
 
 void EntityManager::DeleteMarkedEntities() {
   for (size_t i = 0; i < entities_to_delete_.size(); i++) {
     EntityRef entity = entities_to_delete_[i];
-    RemoveAllComponents(entity);
+    RemoveAllSystems(entity);
     entities_.FreeElement(entity);
   }
   entities_to_delete_.resize(0);
 }
 
-void EntityManager::RemoveAllComponents(EntityRef entity) {
-  for (ComponentId i = 0; i < components_.size(); i++) {
-    if (components_[i] != nullptr && components_[i]->HasDataForEntity(entity)) {
-      components_[i]->RemoveEntity(entity);
+void EntityManager::RemoveAllSystems(EntityRef entity) {
+  for (SystemId i = 0; i < systems_.size(); i++) {
+    if (systems_[i] != nullptr && systems_[i]->HasDataForEntity(entity)) {
+      systems_[i]->RemoveEntity(entity);
     }
   }
 }
 
-void EntityManager::AddEntityToComponent(EntityRef entity,
-                                         ComponentId component_id) {
-  ComponentInterface* component = GetComponent(component_id);
-  assert(component != nullptr);
-  component->AddEntityGenerically(entity);
+void EntityManager::AddEntityToSystem(EntityRef entity,
+                                         SystemId system_id) {
+  SystemInterface* system = GetSystem(system_id);
+  assert(system != nullptr);
+  system->AddEntityGenerically(entity);
 }
 
-void EntityManager::RegisterComponentHelper(ComponentInterface* new_component,
-                                            ComponentId id) {
-  // Make sure this ID isn't already associated with a component.
-  components_.push_back(new_component);
-  assert(new_component == components_[id]);
-  new_component->SetEntityManager(this);
-  new_component->SetComponentIdOnDataType(id);
-  new_component->Init();
+void EntityManager::RegisterSystemHelper(SystemInterface* new_system,
+                                            SystemId id) {
+  // Make sure this ID isn't already associated with a system.
+  systems_.push_back(new_system);
+  assert(new_system == systems_[id]);
+  new_system->SetEntityManager(this);
+  new_system->SetSystemIdOnDataType(id);
+  new_system->Init();
 }
 
-void* EntityManager::GetComponentDataAsVoid(EntityRef entity,
-                                            ComponentId component_id) {
-  return components_[component_id]
-             ? components_[component_id]->GetComponentDataAsVoid(entity)
+void EntityManager::FinalizeSystemList() {
+  for (size_t i = 0; i < systems_.size(); i++) {
+    if (systems_[i]) systems_[i]->DeclareDependencies();
+  }
+  is_system_list_final_ = true;
+  //todo: validate dependencies, make sure none are circular, etc.
+}
+
+
+void* EntityManager::GetSystemDataAsVoid(EntityRef entity,
+                                            SystemId system_id) {
+  return systems_[system_id]
+             ? systems_[system_id]->GetSystemDataAsVoid(entity)
              : nullptr;
 }
 
-const void* EntityManager::GetComponentDataAsVoid(
-    EntityRef entity, ComponentId component_id) const {
-  return components_[component_id]
-             ? components_[component_id]->GetComponentDataAsVoid(entity)
+const void* EntityManager::GetSystemDataAsVoid(
+    EntityRef entity, SystemId system_id) const {
+  return systems_[system_id]
+             ? systems_[system_id]->GetSystemDataAsVoid(entity)
              : nullptr;
 }
 
-void EntityManager::UpdateComponents(WorldTime delta_time) {
-  // Update all the registered components.
-  for (size_t i = 0; i < components_.size(); i++) {
-    if (components_[i]) components_[i]->UpdateAllEntities(delta_time);
+void EntityManager::UpdateSystems(WorldTime delta_time) {
+  // Assert if you haven't finalized the system list.
+  assert(is_system_list_final_);
+  // Update all the registered systems.
+  for (size_t i = 0; i < systems_.size(); i++) {
+    if (systems_[i]) systems_[i]->UpdateAllEntities(delta_time);
   }
   DeleteMarkedEntities();
 }
 
 void EntityManager::Clear() {
-  for (size_t i = 0; i < components_.size(); i++) {
-    if (components_[i]) {
-      components_[i]->ClearComponentData();
-      components_[i]->Cleanup();
+  for (size_t i = 0; i < systems_.size(); i++) {
+    if (systems_[i]) {
+      systems_[i]->ClearComponentData();
+      systems_[i]->Cleanup();
     }
   }
-  components_.clear();
+  systems_.clear();
   entities_.Clear();
 }
 

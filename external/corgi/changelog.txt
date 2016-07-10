@@ -1,1 +1,15 @@
+New in version 2.0.0:
 * Gave AddFromRawData a default implementation.  (No longer pure virtual.)  This means it's no longer a required override.
+* Refactoring!
+  * Component has been renamed System
+  * ComponentData has been renamed Component
+* delta_time changed from int -> double
+
+
+
+Todo:
+* Real dependency tracking
+* Automatic Multithreading scheduling
+* Specialization for systems that have no data
+* networking!
+* remove the allocation location parameter to addentity.
