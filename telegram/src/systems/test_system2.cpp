@@ -6,6 +6,11 @@ CORGI_DEFINE_SYSTEM(TestSystem2, TestData2)
 
 void TestSystem2::UpdateAllEntities(corgi::WorldTime delta_time) {
   //printf("entity updated!");
+  for (auto itr = begin(); itr != end(); ++itr) {
+    corgi::EntityRef entity = itr->entity;
+    TestData* testdata = Data<TestData>(entity);
+  }
+
 
 }
 

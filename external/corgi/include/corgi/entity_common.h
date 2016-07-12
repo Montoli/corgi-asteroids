@@ -18,6 +18,8 @@
 #ifndef CORGI_ENTITY_COMMON_H_
 #define CORGI_ENTITY_COMMON_H_
 
+#define CORGI_ENFORCE_SYSTEM_DEPENDENCIES
+
 namespace corgi {
 
 /// @file

@@ -16,6 +16,7 @@
 #define CORGI_COMPONENT_H_
 
 #include <unordered_map>
+#include <unordered_set>
 #include "corgi/system_id_lookup.h"
 #include "corgi/system_interface.h"
 #include "corgi/entity.h"
@@ -345,6 +346,14 @@ class System : public SystemInterface {
   /// System.
   template <typename ComponentDataType>
   ComponentDataType* Data(const EntityRef& entity) {
+#ifdef CORGI_ENFORCE_SYSTEM_DEPENDENCIES
+    // Verify that we're not asking for any data that we haven't already
+    // declared a dependency on:
+    SystemId component_id = SystemIdLookup<ComponentDataType>::system_id;
+    assert(component_id == SystemIdLookup<T>::system_id ||
+      component_dependencies_.find(component_id)
+        != component_dependencies_.end());
+#endif  // CORGI_ENFORCE_SYSTEM_DEPENDENCIES
     return entity_manager_->GetComponentData<ComponentDataType>(entity);
   }
 
@@ -380,6 +389,14 @@ class System : public SystemInterface {
   /// System.
   template <typename ComponentDataType>
   ComponentDataType* Data(const EntityRef& entity) const {
+#ifdef CORGI_ENFORCE_SYSTEM_DEPENDENCIES
+    // Verify that we're not asking for any data that we haven't already
+    // declared a dependency on:
+    SystemId component_id = SystemIdLookup<ComponentDataType>::system_id;
+    assert(component_id == SystemIdLookup<T>::system_id ||
+      component_dependencies_.find(component_id)
+      != component_dependencies_.end());
+#endif  // CORGI_ENFORCE_SYSTEM_DEPENDENCIES
     return entity_manager_->GetComponentData<ComponentDataType>(entity);
   }
 
@@ -415,8 +432,7 @@ class System : public SystemInterface {
   void DependOn(SystemDependencyType dependency_type) {
     DependOn(SystemIdLookup<SystemType>::system_id, dependency_type);
   }
-
-  
+    
   /// @brief A utility function for declaring a dependency on another system.
   ///
   /// @tparam ComponentDataType The data type of the System to depend on.
@@ -424,12 +440,12 @@ class System : public SystemInterface {
     if (dependency_type == kMustHaveComponent
       || dependency_type == kMustHaveComponentAndExecuteAfter
       || dependency_type == kMustHaveComponentAndExecuteBefore) {
-      component_dependencies_.push_back(system_id);
+      component_dependencies_.insert(system_id);
     }
 
     if (dependency_type == kMustExecuteAfter
       || dependency_type == kMustHaveComponentAndExecuteAfter) {
-      execute_dependencies_.push_back(system_id);
+      execute_dependencies_.insert(system_id);
     }
 
     if (dependency_type == kMustExecuteBefore
@@ -458,8 +474,9 @@ class System : public SystemInterface {
     assert(entity_manager_);
     assert(entity_manager_->is_system_list_final());
 
-    for (size_t i = 0; i < component_dependencies_.size(); i++) {
-      SystemInterface* system = entity_manager_->GetSystem(component_dependencies_[i]);
+    for (auto itr = component_dependencies_.begin();
+        itr != component_dependencies_.end(); ++itr) {
+      SystemInterface* system = entity_manager_->GetSystem(*itr);
       assert(system);
       system->AddEntityGenerically(entity);
     }
@@ -533,11 +550,11 @@ class System : public SystemInterface {
   void RemoveEntityInternal(EntityRef& entity) { CleanupEntity(entity); }
 
   /// @brief : List of systems that we depend on the components of:
-  std::vector<corgi::SystemId> component_dependencies_;
+  std::unordered_set<corgi::SystemId> component_dependencies_;
 
   /// @brief : List of systems that we depend on having updated first,
   /// before this system updates.
-  std::vector<corgi::SystemId> execute_dependencies_;
+  std::unordered_set<corgi::SystemId> execute_dependencies_;
 
  protected:
   /// @brief Get the index of the System data for a given Entity.
