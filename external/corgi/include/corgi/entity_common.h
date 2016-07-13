@@ -90,13 +90,16 @@ static const EntityIdType kInvalidEntityId = static_cast<EntityIdType>(-1);
 /// @enum SystemDependency
 ///
 /// @brief `Various ways that systems depend on each other.
-enum SystemDependencyType {
-  kNoDependency = 0,
-  kMustExecuteBefore,
-  kMustExecuteAfter,
-  kMustHaveComponent,
-  kMustHaveComponentAndExecuteBefore,
-  kMustHaveComponentAndExecuteAfter,
+enum SystemOrderDependencyType {
+  kNoOrderDependency = 0,
+  kExecuteBefore,
+  kExecuteAfter,
+};
+
+enum SystemAccessDependencyType {
+  kNoAccessDependency = 0,
+  kReadAccess,
+  kReadWriteAccess,
 };
 
 /// @}

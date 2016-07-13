@@ -7,11 +7,15 @@ CORGI_DEFINE_SYSTEM(TestSystem, TestData)
 void TestSystem::UpdateAllEntities(corgi::WorldTime delta_time) {
   //  printf("entity updated!");
 
+
+  // illegal without declaring accesss dependency...
   
+  /*
   for (auto itr = begin(); itr != end(); ++itr) {
     corgi::EntityRef entity = itr->entity;
     TestData2* testdata = Data<TestData2>(entity);
   }
+  */
 
 }
 

@@ -131,10 +131,10 @@ public:
 	/// dependencies they have on other systems, if any. (Via System::DependOn)
 	virtual void DeclareDependencies() = 0;
 
-  /// @brief Invoked by EntityManager::FinalizeSystemList, once all systems
-  // have been registered.  This is the place for systems to declare any
-  /// dependencies they have on other systems, if any. (Via System::DependOn)
-  virtual void DependOn(SystemId system_id, SystemDependencyType dependency_type) = 0;
+  /// @brief Declare a specific dependency on another system.
+  virtual void DependOn(SystemId system_id,
+                        SystemOrderDependencyType order_dependency,
+                        SystemAccessDependencyType access_dependency) = 0;
 
   /// @brief Called by the EntityManager every time an Entity is added to this
   /// System.
@@ -191,6 +191,22 @@ public:
   ///
   /// @param[in] id The System ID to set for the data type.
   virtual void SetSystemIdOnDataType(SystemId id) = 0;
+
+  /// @brief Determines whether this system is safe to farm out to a
+  /// separate thread for faster updates.  Disabled by default.
+  ///
+  /// @return Returns true if this system can be safely executed from
+  /// a different (non-main) thread.
+  virtual bool IsThreadSafe() = 0;
+
+  /// @brief Used to mark a system as being safe to execute from a
+  /// separate thread.  By default, all systems are unsafe, so they
+  /// will simply execute in dependency-order on the main thread.  Any
+  /// systems marked as thread-safe will 
+  ///
+  /// @param[in] is_thread_safe a boolean specifying the thread-safety
+  /// of this system.  True means that it is thread-safe.
+  virtual void SetIsThreadSafe(bool is_thread_safe) = 0;
 };
 /// @}
 

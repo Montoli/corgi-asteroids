@@ -101,7 +101,7 @@ class System : public SystemInterface {
   typedef T value_type;
 
   /// @brief Construct a System without an EntityManager.
-  System() : entity_manager_(nullptr) {}
+  System() : entity_manager_(nullptr), is_thread_safe_(false) {}
 
   /// @brief Destructor for a System.
   virtual ~System() {}
@@ -349,10 +349,9 @@ class System : public SystemInterface {
 #ifdef CORGI_ENFORCE_SYSTEM_DEPENDENCIES
     // Verify that we're not asking for any data that we haven't already
     // declared a dependency on:
-    SystemId component_id = SystemIdLookup<ComponentDataType>::system_id;
-    assert(component_id == SystemIdLookup<T>::system_id ||
-      component_dependencies_.find(component_id)
-        != component_dependencies_.end());
+    SystemId system_id = SystemIdLookup<ComponentDataType>::system_id;
+    assert(system_id == SystemIdLookup<T>::system_id ||
+      access_dependencies_.find(system_id) != access_dependencies_.end());
 #endif  // CORGI_ENFORCE_SYSTEM_DEPENDENCIES
     return entity_manager_->GetComponentData<ComponentDataType>(entity);
   }
@@ -429,38 +428,41 @@ class System : public SystemInterface {
   ///
   /// @tparam ComponentDataType The data type of the System to depend on.
   template <typename SystemType>
-  void DependOn(SystemDependencyType dependency_type) {
-    DependOn(SystemIdLookup<SystemType>::system_id, dependency_type);
+  void DependOn(SystemOrderDependencyType order_dependency,
+      SystemAccessDependencyType access_dependency) {
+    DependOn(SystemIdLookup<SystemType>::system_id, order_dependency,
+        access_dependency);
   }
     
   /// @brief A utility function for declaring a dependency on another system.
   ///
   /// @tparam ComponentDataType The data type of the System to depend on.
-  virtual void DependOn(SystemId system_id, SystemDependencyType dependency_type) {
-    if (dependency_type == kMustHaveComponent
-      || dependency_type == kMustHaveComponentAndExecuteAfter
-      || dependency_type == kMustHaveComponentAndExecuteBefore) {
-      component_dependencies_.insert(system_id);
-    }
+  virtual void DependOn(SystemId system_id,
+    // If we need to make this system exceute before something else, then
+    // we just add ourselves as a dependency to the target.  This way, the
+    // dependency tree is entirely one-direction, with children referencing
+    // their parents, but not vice versa.
+    SystemOrderDependencyType order_dependency,
+      SystemAccessDependencyType access_dependency) {
 
-    if (dependency_type == kMustExecuteAfter
-      || dependency_type == kMustHaveComponentAndExecuteAfter) {
-      execute_dependencies_.insert(system_id);
-    }
-
-    if (dependency_type == kMustExecuteBefore
-      || dependency_type == kMustHaveComponentAndExecuteBefore) {
-
+    if (order_dependency == kExecuteBefore) {
       assert(entity_manager_);
       assert(entity_manager_->is_system_list_final());
       SystemInterface* system = entity_manager_->GetSystem(system_id);
       assert(system);
-      // If we need to make this system exceute before something else, then
-      // we just add ourselves as a dependency to the target.  This way, the
-      // dependency tree is entirely one-direction.
-      system->DependOn(SystemIdLookup<T>::system_id, dependency_type == kMustExecuteBefore
-                          ? kMustExecuteAfter 
-                          : kMustHaveComponentAndExecuteAfter);
+
+      // This is a little tricky - we can use kNoAccessDependency, because it
+      // won't actually set the dependency to none, but will instead just fail to
+      // change it at all.  So this is a safe way to add an order dependency
+      // without affecting anything else.
+      system->DependOn(SystemIdLookup<T>::system_id,
+        kExecuteAfter, kNoAccessDependency);
+    } else if (order_dependency == kExecuteAfter) {
+      execute_dependencies_.insert(system_id);
+    }
+
+    if (access_dependency != kNoAccessDependency) {
+      access_dependencies_[system_id] = access_dependency;
     }
   }
 
@@ -474,9 +476,9 @@ class System : public SystemInterface {
     assert(entity_manager_);
     assert(entity_manager_->is_system_list_final());
 
-    for (auto itr = component_dependencies_.begin();
-        itr != component_dependencies_.end(); ++itr) {
-      SystemInterface* system = entity_manager_->GetSystem(*itr);
+    for (auto itr = access_dependencies_.begin();
+        itr != access_dependencies_.end(); ++itr) {
+      SystemInterface* system = entity_manager_->GetSystem(itr->first);
       assert(system);
       system->AddEntityGenerically(entity);
     }
@@ -541,6 +543,25 @@ class System : public SystemInterface {
     SystemIdLookup<T>::system_id = id;
   }
 
+
+  /// @brief Determines whether this system is safe to farm out to a
+  /// separate thread for faster updates.  Disabled by default.
+  ///
+  /// @return Returns true if this system can be safely executed from
+  /// a different (non-main) thread.
+  virtual bool IsThreadSafe() { return is_thread_safe_; }
+
+  /// @brief Used to mark a system as being safe to execute from a
+  /// separate thread.  By default, all systems are unsafe, so they
+  /// will simply execute in dependency-order on the main thread.  Any
+  /// systems marked as thread-safe will 
+  ///
+  /// @param[in] is_thread_safe a boolean specifying the thread-safety
+  /// of this system.  True means that it is thread-safe.
+  virtual void SetIsThreadSafe(bool is_thread_safe) {
+    is_thread_safe_ = is_thread_safe;
+  }
+
  private:
   /// @brief Allows Components to handle any per-Entity clean up that may
   /// be needed.
@@ -550,11 +571,14 @@ class System : public SystemInterface {
   void RemoveEntityInternal(EntityRef& entity) { CleanupEntity(entity); }
 
   /// @brief : List of systems that we depend on the components of:
-  std::unordered_set<corgi::SystemId> component_dependencies_;
+  std::unordered_map<SystemId, SystemAccessDependencyType> access_dependencies_;
 
   /// @brief : List of systems that we depend on having updated first,
   /// before this system updates.
-  std::unordered_set<corgi::SystemId> execute_dependencies_;
+  std::unordered_set<SystemId> execute_dependencies_;
+  
+  /// @brief : Designates whether or not this system is thread-safe.
+  bool is_thread_safe_;
 
  protected:
   /// @brief Get the index of the System data for a given Entity.

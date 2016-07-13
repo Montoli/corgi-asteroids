@@ -16,7 +16,7 @@ void TestSystem2::UpdateAllEntities(corgi::WorldTime delta_time) {
 
 void TestSystem2::DeclareDependencies() {
 
-  DependOn<TestSystem>(corgi::kMustHaveComponent);
+  DependOn<TestSystem>(corgi::kNoOrderDependency, corgi::kReadAccess);
 }
 
 
