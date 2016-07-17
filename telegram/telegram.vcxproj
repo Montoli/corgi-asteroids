@@ -138,6 +138,7 @@
     <ClCompile Include="src\systems\test_system2.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\external\corgi\include\corgi\network_system.h" />
     <ClInclude Include="..\external\corgi\include\corgi\system.h" />
     <ClInclude Include="..\external\corgi\include\corgi\system_id_lookup.h" />
     <ClInclude Include="..\external\corgi\include\corgi\system_interface.h" />

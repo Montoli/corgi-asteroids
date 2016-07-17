@@ -86,6 +86,9 @@
     <ClInclude Include="src\systems\test_system2.h">
       <Filter>Source Files\systems</Filter>
     </ClInclude>
+    <ClInclude Include="..\external\corgi\include\corgi\network_system.h">
+      <Filter>corgi</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\external\corgi\changelog.txt">

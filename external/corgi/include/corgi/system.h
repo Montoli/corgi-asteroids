@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef CORGI_COMPONENT_H_
-#define CORGI_COMPONENT_H_
+#ifndef CORGI_SYSTEM_H_
+#define CORGI_SYSTEM_H_
 
 #include <unordered_map>
 #include <unordered_set>
@@ -624,4 +624,4 @@ class System : public SystemInterface {
 
 }  // corgi
 
-#endif  // CORGI_COMPONENT_H_
+#endif  // CORGI_SYSTEM_H_
