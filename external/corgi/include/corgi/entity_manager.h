@@ -15,6 +15,9 @@
 #ifndef CORGI_ENTITY_MANAGER_H_
 #define CORGI_ENTITY_MANAGER_H_
 
+#include <SDL.h>
+#include <unordered_set>
+#include <map>
 #include "corgi/system_id_lookup.h"
 #include "corgi/system_interface.h"
 #include "corgi/entity.h"
@@ -46,6 +49,7 @@ typedef VectorPool<Entity>::VectorPoolReference EntityRef;
 
 class EntityFactoryInterface;
 class SystemInterface;
+class EntityManager;
 
 /// @class EntityManager
 /// @brief The EntityManager is the code that manages all
@@ -62,6 +66,9 @@ class EntityManager {
  public:
   /// @brief Constructor for the EntityManager.
   EntityManager();
+	 
+	/// @brief Destructor for the EntitnyManager.
+	~EntityManager();
 
   /// @brief Returns the version of the Corgi entity library.
   const CorgiVersion* GetCorgiVersion() { return version_; }
@@ -328,6 +335,12 @@ class EntityManager {
   /// no longer allowed to change their dependencies.
   bool is_system_list_final() { return is_system_list_final_; }
 
+	/// @brief Sets the max number of worker threads.  Must be called
+	/// before FinalizeSystemLists or else it is ignored.
+	int set_max_worker_threads(int max_worker_threads) {
+		max_worker_threads_ = max_worker_threads;
+	}
+
  private:
   /// @brief Handles the majority of the work for registering a System (
   /// aside from some of the template stuff). In particular, it verifies that
@@ -379,6 +392,26 @@ class EntityManager {
   const void* GetSystemDataAsVoid(EntityRef entity,
                                      SystemId system_id) const;
 
+  /// @brief Searches through unupdated systems until it finds one that
+  /// is legal to begin updating.  (No unupdated dependencies, and no
+  /// read/write blocks.)
+  ///
+  /// @param[in] main_thread_only Specifies if you only want systems that can
+  /// be run from the main thread.  If set to true, FindSystemToUpdate will
+  /// only return systems that need to execute from the main thread.
+  ///
+  /// @return The system ID of the system to update.  Returns kInvalidSystem
+  /// if none could be found.
+  SystemId ClaimSystemToUpdate(bool main_thread_only);
+
+	// TODO(ccornell): write comments for these:
+	void MarkSystemAsUpdating(SystemId system);
+	void MarkSystemAsUpdated(SystemId system);
+
+	void WakeWorkerThreads();
+
+	static int EntityManagerWorkerThread(void*);
+
   /// @var entities_
   ///
   /// @brief Storage for all the Entities currently tracked by the
@@ -390,6 +423,21 @@ class EntityManager {
   /// @brief All the Components that are tracked by the system, and are
   /// ready to have Entities added to them.
   std::vector<SystemInterface*> systems_;
+
+  // todo(ccornell): write comments for these:
+  std::unordered_set<SystemId> unupdated_systems_;
+  std::unordered_set<SystemId> updated_systems_;
+  std::unordered_set<SystemId> currently_updating_systems_;
+	std::map<SystemId, int> systems_being_written_to_;
+	std::map<SystemId, int> systems_being_read_from_;
+
+	// Thread stuff:
+	bool exit_worker_threads_;
+	SDL_mutex* bookkeeping_mutex_;
+	SDL_mutex* worker_thread_mutex_;
+	SDL_cond* worker_thread_cond_;
+	WorldTime delta_time_;
+	int max_worker_threads_;
 
   /// @var entities_to_delete_
   ///

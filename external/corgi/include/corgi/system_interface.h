@@ -15,6 +15,8 @@
 #ifndef CORGI_COMPONENT_INTERFACE_H_
 #define CORGI_COMPONENT_INTERFACE_H_
 
+#include <unordered_set>
+#include <unordered_map>
 #include <stdint.h>
 #include <functional>
 #include <memory>
@@ -136,6 +138,12 @@ public:
                         SystemOrderDependencyType order_dependency,
                         SystemAccessDependencyType access_dependency) = 0;
 
+  // todo: write desc
+  virtual const std::unordered_map<SystemId, SystemAccessDependencyType>*
+	  AccessDependencies() = 0;
+  // todo: write desc
+  virtual const std::unordered_set<SystemId>* ExecuteDependencies() = 0;
+
   /// @brief Called by the EntityManager every time an Entity is added to this
   /// System.
   ///
@@ -192,6 +200,9 @@ public:
   /// @param[in] id The System ID to set for the data type.
   virtual void SetSystemIdOnDataType(SystemId id) = 0;
 
+  /// @brief Returns the System ID for this system.
+  virtual SystemId GetSystemId() = 0;
+
   /// @brief Determines whether this system is safe to farm out to a
   /// separate thread for faster updates.  Disabled by default.
   ///
@@ -207,6 +218,7 @@ public:
   /// @param[in] is_thread_safe a boolean specifying the thread-safety
   /// of this system.  True means that it is thread-safe.
   virtual void SetIsThreadSafe(bool is_thread_safe) = 0;
+
 };
 /// @}
 

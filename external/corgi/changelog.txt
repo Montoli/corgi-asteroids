@@ -4,12 +4,14 @@ New in version 2.0.0:
   * Component has been renamed System
   * ComponentData has been renamed Component
 * delta_time changed from int -> double
-
-
-
-Todo:
 * Real dependency tracking
+* Support functions for multighreading.  (accessdependencies, etc)
+
+rename systemindex->componentindex
+rename 
+Todo:
 * Automatic Multithreading scheduling
 * Specialization for systems that have no data
 * networking!
 * remove the allocation location parameter to addentity.
+* Make smarter multithreading scheduler.

@@ -527,13 +527,6 @@ class System : public SystemInterface {
     entity_manager_ = entity_manager;
   }
 
-  /// @brief Get the ID for this System.
-  ///
-  /// @return Returns the System ID for this System.
-  static SystemId GetComponentId() {
-    return static_cast<SystemId>(SystemIdLookup<T>::system_id);
-  }
-
   /// @brief Sets the System ID on the data type.
   ///
   /// @note This is usually only called by the EntityManager.
@@ -543,6 +536,10 @@ class System : public SystemInterface {
     SystemIdLookup<T>::system_id = id;
   }
 
+  /// @brief Returns the System ID.
+  virtual SystemId GetSystemId() {
+	  return SystemIdLookup<T>::system_id;
+  }
 
   /// @brief Determines whether this system is safe to farm out to a
   /// separate thread for faster updates.  Disabled by default.
@@ -561,6 +558,18 @@ class System : public SystemInterface {
   virtual void SetIsThreadSafe(bool is_thread_safe) {
     is_thread_safe_ = is_thread_safe;
   }
+
+	  // todo: write desc
+  virtual const std::unordered_map<SystemId, SystemAccessDependencyType>*
+	  AccessDependencies() {
+		return &access_dependencies_;
+  }
+
+  // todo: write desc
+  virtual const std::unordered_set<SystemId>* ExecuteDependencies() {
+		return &execute_dependencies_;
+  }
+
 
  private:
   /// @brief Allows Components to handle any per-Entity clean up that may

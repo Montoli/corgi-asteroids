@@ -27,7 +27,7 @@ namespace corgi {
 /// @{
 ///
 
-/// @var SystemId
+	/// @var SystemId
 ///
 /// @brief This represents the ID of a System.
 ///
@@ -49,10 +49,6 @@ const SystemId kInvalidSystem = static_cast<SystemId>(-1);
 ///
 /// @brief A typedef that represents time in the game.
 typedef double WorldTime;
-
-/// @cond CORGI_INTERNAL
-const int kMillisecondsPerSecond = 1000;
-/// @endcond
 
 /// @typedef SystemIndex
 ///

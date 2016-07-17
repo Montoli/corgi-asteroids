@@ -15,6 +15,9 @@ void MainState::Init() {
 
 
 void MainState::Update(double delta_time) {
+	printf("---------------------------------------------\n");
+	printf("start of update!\n");
+	printf("---------------------------------------------\n");
 
   entity_manager_.UpdateSystems(delta_time);
 
