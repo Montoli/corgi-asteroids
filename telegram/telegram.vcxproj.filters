@@ -45,6 +45,15 @@
     <ClCompile Include="src\systems\test_system2.cpp">
       <Filter>Source Files\systems</Filter>
     </ClCompile>
+    <ClCompile Include="src\systems\transform.cpp">
+      <Filter>Source Files\systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\systems\sprite.cpp">
+      <Filter>Source Files\systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\systems\common.cpp">
+      <Filter>Source Files\systems</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\external\corgi\include\corgi\entity.h">
@@ -88,6 +97,15 @@
     </ClInclude>
     <ClInclude Include="..\external\corgi\include\corgi\network_system.h">
       <Filter>corgi</Filter>
+    </ClInclude>
+    <ClInclude Include="src\systems\transform.h">
+      <Filter>Source Files\systems</Filter>
+    </ClInclude>
+    <ClInclude Include="src\systems\sprite.h">
+      <Filter>Source Files\systems</Filter>
+    </ClInclude>
+    <ClInclude Include="src\systems\common.h">
+      <Filter>Source Files\systems</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

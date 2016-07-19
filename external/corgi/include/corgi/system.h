@@ -559,6 +559,16 @@ class System : public SystemInterface {
     is_thread_safe_ = is_thread_safe;
   }
 
+	//-------------------------------
+	// Network synchronization.
+	virtual void SetRewindBufferProperties(WorldTime buffer_timestep,
+		WorldTime buffer_history_length) {}
+	virtual void StartRewindBuffer() {}
+	virtual void RewindToTimestamp(WorldTime new_timestamp) {}
+	//-------------------------------
+
+
+
 	  // todo: write desc
   virtual const std::unordered_map<SystemId, SystemAccessDependencyType>*
 	  AccessDependencies() {

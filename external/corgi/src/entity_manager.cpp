@@ -21,7 +21,6 @@ namespace corgi {
 
 #define DEFAULT_MAX_THREADS 3
 
-
 // The reference to the version string is important because it ensures that
 // the constant won't be stripped out by the compiler.
 EntityManager::EntityManager()
@@ -38,7 +37,6 @@ EntityManager::~EntityManager() {
 	SDL_DestroyMutex(worker_thread_mutex_);
 	SDL_DestroyCond(worker_thread_cond_);
 }
-
 
 // Allocates a new entity and returns it
 EntityRef EntityManager::AllocateNewEntity() {
@@ -166,38 +164,28 @@ void EntityManager::UpdateSystems(WorldTime delta_time) {
 		unupdated_systems_.insert(systems_[static_cast<SystemId>(i)]->GetSystemId());
 	}
 
-	/*
-	while (unupdated_systems_.size() +
-		  currently_updating_systems_.size() > 0) {
-		SystemId system_id = ClaimSystemToUpdate(true);
-		SystemInterface* system = GetSystem(system_id);
-		system->UpdateAllEntities(delta_time);
-		MarkSystemAsUpdated(system_id);
-	}
-	*/
-
 	WakeWorkerThreads();
-	while (unupdated_systems_.size() +
-		currently_updating_systems_.size() > 0) {
+	while (!IsSystemUpdateComplete()) {
 		SystemId system_id = ClaimSystemToUpdate(true);
-		if (system_id == kInvalidEntityId) {
-			// nothing to do right now - wait for other stuff to finish.
-			SDL_LockMutex(worker_thread_mutex_);
-			if (unupdated_systems_.size() +
-				currently_updating_systems_.size() > 0) {
-				SDL_CondWait(worker_thread_cond_,
-					worker_thread_mutex_);
-			}
+		// Lock the mutex BEFORE we do our comparisons
+		// to make sure no one broadcasts after we commit
+		// to CondWaiting, but before we actually CondWait...
+		SDL_LockMutex(worker_thread_mutex_);
+		if (system_id == kInvalidEntityId && !IsSystemUpdateComplete()) {
+			SDL_CondWait(worker_thread_cond_,
+				worker_thread_mutex_);
 			SDL_UnlockMutex(worker_thread_mutex_);
+			printf("--Main woke up!\n");
 		} else {
+			SDL_UnlockMutex(worker_thread_mutex_);
+			printf("--Main found something to do...\n");
+
 			SystemInterface* system = GetSystem(system_id);
 			system->UpdateAllEntities(delta_time_);
 			MarkSystemAsUpdated(system_id);
 			WakeWorkerThreads();
 		}
 	}
-
-
 
 	// Sanity checking - we should not be reading/writing from anything
 	// when we are done with updates.
@@ -211,6 +199,10 @@ void EntityManager::UpdateSystems(WorldTime delta_time) {
 }
 
 
+bool EntityManager::IsSystemUpdateComplete() {
+	return !(unupdated_systems_.size() +
+		currently_updating_systems_.size() > 0);
+}
 
 void EntityManager::WakeWorkerThreads() {
 	// tell every other worker thread (and the main game!) that
@@ -219,38 +211,6 @@ void EntityManager::WakeWorkerThreads() {
 	SDL_CondBroadcast(worker_thread_cond_);
 	SDL_UnlockMutex(worker_thread_mutex_);
 }
-
-/*
-void EntityManager::UpdateSystems(WorldTime delta_time) {
-
-	// Start out with everything unupdated, and nothing being
-	// written to.
-	for (int i = 0; i < systems_.size(); i++) {
-		unupdated_systems_.insert(systems_[i]->SystemId());
-		systems_being_written_to_.clear();
-	}
-
-
-	//start worker threads here:
-
-	while (unupdated_systems_.size() > 0) {
-		// grab a system and update it!
-
-		SystemId system_to_update = ClaimSystemToUpdate(true);
-		if (system_to_update != kInvalidSystem) {
-			GetSystem(system_to_update)->UpdateAllEntities(delta_time);
-
-		}
-	}
-}
-*/
-
-//Thread overview:
-// wait for condition variable.
-
-
-
-
 
 /// @brief Searches through unupdated systems until it finds one that
 /// is legal to begin updating.  (No unupdated dependencies, and no
@@ -283,7 +243,7 @@ SystemId EntityManager::ClaimSystemToUpdate(bool is_for_main_thread) {
 		// Check that all dependencies have been updated.
 		for (auto dep = current_system->ExecuteDependencies()->begin();
 			  dep != current_system->ExecuteDependencies()->end(); ++dep) {
-			if (unupdated_systems_.find(*dep) == unupdated_systems_.end()) {
+			if (updated_systems_.find(*dep) == updated_systems_.end()) {
 				// it has one or more dependencies that need to be
 				// executed before it can execute.
 				current_system_ok = false;
@@ -361,7 +321,6 @@ SystemId EntityManager::ClaimSystemToUpdate(bool is_for_main_thread) {
 	return result;
 }
 
-
 void EntityManager::MarkSystemAsUpdating(SystemId systemId) {
 	//  NOTE:  We do NOT need to lock the mutex here, becuase
 	// this function is only ever called from witin ClaimSystemToUpdate.
@@ -395,8 +354,6 @@ void EntityManager::MarkSystemAsUpdating(SystemId systemId) {
 		}
 	}
 }
-
-
 
 void EntityManager::MarkSystemAsUpdated(SystemId systemId) {
 	SDL_LockMutex(bookkeeping_mutex_);
@@ -458,7 +415,6 @@ int EntityManager::EntityManagerWorkerThread(void * data) {
 	return 0;
 }
 
-
 void EntityManager::Clear() {
   for (size_t i = 0; i < systems_.size(); i++) {
     if (systems_[i]) {
@@ -474,10 +430,5 @@ EntityRef EntityManager::CreateEntityFromData(const void* data) {
   assert(entity_factory_ != nullptr);
   return entity_factory_->CreateEntityFromData(data, this);
 }
-
-
-
-
-
 
 }  // corgi

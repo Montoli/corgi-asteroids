@@ -219,6 +219,17 @@ public:
   /// of this system.  True means that it is thread-safe.
   virtual void SetIsThreadSafe(bool is_thread_safe) = 0;
 
+
+
+	//-------------------------------
+	// Network synchronization:
+	virtual void SetRewindBufferProperties(WorldTime buffer_timestep,
+		WorldTime buffer_history_length) = 0;
+	virtual void StartRewindBuffer() = 0;
+	virtual void RewindToTimestamp(WorldTime new_timestamp) = 0;
+	//-------------------------------
+
+
 };
 /// @}
 

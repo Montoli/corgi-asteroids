@@ -412,6 +412,10 @@ class EntityManager {
 
 	static int EntityManagerWorkerThread(void*);
 
+	// Utility function for checking if we've updated everything yet.
+	bool IsSystemUpdateComplete();
+
+
   /// @var entities_
   ///
   /// @brief Storage for all the Entities currently tracked by the

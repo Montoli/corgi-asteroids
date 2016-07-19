@@ -18,7 +18,7 @@ public:
 
 };
 
-CORGI_REGISTER_SYSTEM(TestData2, TestSystem2)
+CORGI_REGISTER_SYSTEM(TestSystem2, TestData2)
 
 
 #endif // TEST_SYSTEM_H2

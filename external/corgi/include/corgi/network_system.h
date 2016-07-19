@@ -22,14 +22,6 @@ namespace corgi {
 template <typename T>
 class NetworkSystem : public System<T> {
  public:
-	 virtual void SetRewindBufferProperties(WorldTime buffer_length,
-		 WorldTime buffer_resolution);
-
-	 virtual void StartRewindBuffer();
-
-	 virtual void UpdateAllEntities(WorldTime delta_time);
-
-	 virtual void RewindToTimestamp(Worldtime new_timestamp);
 
 
  private:
