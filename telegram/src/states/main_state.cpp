@@ -13,7 +13,8 @@ MainState::MainState(SDL_Window* window, SDL_Surface* screen_surface) {
 void MainState::Init() {
   printf("hello world!\n");
   corgi::EntityRef entity = entity_manager_.AllocateNewEntity();
-  entity_manager_.RegisterSystem(&test_system_);
+	entity_manager_.RegisterSystem(&common_system_);
+	entity_manager_.RegisterSystem(&test_system_);
   entity_manager_.RegisterSystem(&test_system2_);
 	entity_manager_.RegisterSystem(&transform_system_);
 	entity_manager_.RegisterSystem(&sprite_system_);
@@ -33,6 +34,10 @@ void MainState::Update(double delta_time) {
   entity_manager_.UpdateSystems(delta_time);
 
   SDL_Event event;
+
+
+	sprite_system_.RenderSprites(common_system_.CommonData()->screen_surface);
+	SDL_UpdateWindowSurface(common_system_.CommonData()->window);
 
 
   while (SDL_PollEvent(&event)) {

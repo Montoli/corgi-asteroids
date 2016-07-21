@@ -1,5 +1,7 @@
 #ifndef SPRITE_SYSTEM_H
 #define SPRITE_SYSTEM_H
+#include <SDL.h>
+#include <SDL_image.h>
 #include "corgi/system.h"
 
 struct SpriteComponent {
@@ -16,7 +18,16 @@ public:
 
   virtual void DeclareDependencies();
 
-  virtual void InitEntity(corgi::EntityRef& entity);
+	virtual void Cleanup();
+
+	virtual void InitEntity(corgi::EntityRef& entity);
+
+	void RenderSprites(SDL_Surface* screen_surface);
+
+	SDL_Surface * LoadPNG(std::string path);
+
+private:
+	SDL_Surface* hello_world = NULL;
 
 };
 
