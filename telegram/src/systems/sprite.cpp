@@ -1,6 +1,7 @@
 #include "sprite.h"
 #include "transform.h"
 #include "common.h"
+#include "GL/glew.h"
 
 CORGI_DEFINE_SYSTEM(SpriteSystem, SpriteComponent)
 /*
@@ -41,8 +42,13 @@ void SpriteSystem::InitEntity(corgi::EntityRef& entity) {
 
 }
 
-void SpriteSystem::RenderSprites(SDL_Surface * screen_surface) {
-	SDL_BlitSurface(hello_world, NULL, screen_surface, NULL);
+void SpriteSystem::RenderSprites() {
+//	SDL_BlitSurface(hello_world, NULL, screen_surface, NULL);
+
+	//glClearColor(0, 0, 0, 1);
+	//glClear(GL_COLOR_BUFFER_BIT);
+	//SDL_GL_SwapWindow(window);
+
 
 }
 
@@ -50,7 +56,7 @@ SDL_Surface* SpriteSystem::LoadPNG(std::string path) {
 	//The final optimized image
 	SDL_Surface* optimizedSurface = NULL;
 	CommonComponent* common = entity_manager_->GetSystem<CommonSystem>()->CommonData();
-
+	/*
 	//Load image at specified path
 	SDL_Surface* loadedSurface = IMG_Load(path.c_str());
 	if (loadedSurface == NULL) {
@@ -65,7 +71,7 @@ SDL_Surface* SpriteSystem::LoadPNG(std::string path) {
 		//Get rid of old loaded surface
 		SDL_FreeSurface(loadedSurface);
 	}
-
+	*/
 	return optimizedSurface;
 }
 
@@ -89,6 +95,7 @@ void SpriteSystem::Init() {
 		assert(false);
 	}
 
+	/*
 
 	//hello_world = SDL_LoadBMP("rsc\\hello_world.bmp");
 	hello_world = LoadPNG("rsc/welshcorgi.png");
@@ -97,6 +104,6 @@ void SpriteSystem::Init() {
 		printf("Unable to load image! SDL Error: %s\n",  SDL_GetError());
 		assert(false);
 	}
-
+	*/
 
 }

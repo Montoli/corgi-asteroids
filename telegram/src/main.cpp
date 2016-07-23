@@ -22,6 +22,9 @@ int main(int argc, char* args[])
   //The surface contained by the window
   SDL_Surface* screen_surface = NULL;
 
+	// init Glew
+	glewInit();
+
   //Initialize SDL
   if (SDL_Init(SDL_INIT_VIDEO) < 0)
   {
@@ -30,7 +33,14 @@ int main(int argc, char* args[])
   else
   {
     //Create window
-    window = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+    window = SDL_CreateWindow(
+			"SDL Tutorial", 
+			SDL_WINDOWPOS_UNDEFINED, 
+			SDL_WINDOWPOS_UNDEFINED, 
+			SCREEN_WIDTH,
+			SCREEN_HEIGHT, 
+			SDL_WINDOW_OPENGL);
+
     if (window == NULL)
     {
       printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
@@ -38,12 +48,8 @@ int main(int argc, char* args[])
     else
     {
 
-			SDL_GLContext glcontext = SDL_GL_CreateContext(window);
+			SDL_GLContext gl_context = SDL_GL_CreateContext(window);
 
-			// now you can make GL calls.
-			glClearColor(0, 0, 0, 1);
-			glClear(GL_COLOR_BUFFER_BIT);
-			SDL_GL_SwapWindow(window);
 
 			// Once finished with OpenGL functions, the SDL_GLContext can be deleted.
 			//SDL_GL_DeleteContext(glcontext);
@@ -53,13 +59,20 @@ int main(int argc, char* args[])
 
 
       //Get window surface
-			screen_surface = SDL_GetWindowSurface(window);
+			//screen_surface = SDL_GetWindowSurface(window);
 
       //Fill the surface white
-      SDL_FillRect(screen_surface, NULL, SDL_MapRGB(screen_surface->format, 0xFF, 0xFF, 0xFF));
+      //SDL_FillRect(screen_surface, NULL, SDL_MapRGB(screen_surface->format, 0xFF, 0xFF, 0xFF));
 
       //Update the surface
       SDL_UpdateWindowSurface(window);
+
+
+			// now you can make GL calls.
+			glClearColor(0, 1, 0, 1);
+			glClear(GL_COLOR_BUFFER_BIT);
+			SDL_GL_SwapWindow(window);
+
 
       StateManager state_manager;
 
@@ -69,11 +82,12 @@ int main(int argc, char* args[])
         SDL_Delay(1000/60);
         state_manager.Update(1000 / 60);
       }
-    }
+			SDL_GL_DeleteContext(gl_context);
+		}
   }
 
   //Destroy window
-  SDL_DestroyWindow(window);
+	SDL_DestroyWindow(window);
 
   //Quit SDL subsystems
   SDL_Quit();

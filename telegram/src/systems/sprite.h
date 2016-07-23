@@ -22,7 +22,7 @@ public:
 
 	virtual void InitEntity(corgi::EntityRef& entity);
 
-	void RenderSprites(SDL_Surface* screen_surface);
+	void RenderSprites();
 
 	SDL_Surface * LoadPNG(std::string path);
 

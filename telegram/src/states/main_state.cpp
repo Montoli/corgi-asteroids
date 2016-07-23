@@ -36,7 +36,7 @@ void MainState::Update(double delta_time) {
   SDL_Event event;
 
 
-	sprite_system_.RenderSprites(common_system_.CommonData()->screen_surface);
+	sprite_system_.RenderSprites();
 	SDL_UpdateWindowSurface(common_system_.CommonData()->window);
 
 
