@@ -5,6 +5,8 @@ and may not be redistributed without written permission.*/
 #include <SDL.h>
 #include <stdio.h>
 
+#include "GL/glew.h"
+
 #include "states/state_manager.h"
 #include "states/main_state.h"
 
@@ -35,6 +37,21 @@ int main(int argc, char* args[])
     }
     else
     {
+
+			SDL_GLContext glcontext = SDL_GL_CreateContext(window);
+
+			// now you can make GL calls.
+			glClearColor(0, 0, 0, 1);
+			glClear(GL_COLOR_BUFFER_BIT);
+			SDL_GL_SwapWindow(window);
+
+			// Once finished with OpenGL functions, the SDL_GLContext can be deleted.
+			//SDL_GL_DeleteContext(glcontext);
+
+
+
+
+
       //Get window surface
 			screen_surface = SDL_GetWindowSurface(window);
 

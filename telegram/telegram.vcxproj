@@ -69,12 +69,12 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>..\external\corgi\include;src;..\external\SDL2-2.0.4\include;..\external\SDL2_image-2.0.1\include;$(IncludePath)</IncludePath>
-    <LibraryPath>..\external\SDL2-2.0.4\lib\x86;..\external\SDL2_image-2.0.1\lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>..\external\glew-1.13.0\include;..\external\corgi\include;src;..\external\SDL2-2.0.4\include;..\external\SDL2_image-2.0.1\include;$(IncludePath)</IncludePath>
+    <LibraryPath>..\external\glew-1.13.0\lib\Release\Win32;..\external\SDL2-2.0.4\lib\x86;..\external\SDL2_image-2.0.1\lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>..\external\corgi\include;src;..\external\SDL2-2.0.4\include;..\external\SDL2_image-2.0.1\include;$(IncludePath)</IncludePath>
-    <LibraryPath>..\external\SDL2-2.0.4\lib\x86;..\external\SDL2_image-2.0.1\lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>..\external\glew-1.13.0\include;..\external\corgi\include;src;..\external\SDL2-2.0.4\include;..\external\SDL2_image-2.0.1\include;$(IncludePath)</IncludePath>
+    <LibraryPath>..\external\glew-1.13.0\lib\Release\Win32;..\external\SDL2-2.0.4\lib\x86;..\external\SDL2_image-2.0.1\lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -83,7 +83,7 @@
       <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;opengl32.lib;glew32s.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
     <PostBuildEvent>
@@ -111,7 +111,7 @@ xcopy /y /d  "$(ProjectDir)rsc\*" "$(OutDir)rsc"</Command>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;opengl32.lib;glew32s.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
     <PostBuildEvent>
@@ -156,6 +156,9 @@ xcopy /y /d  "$(ProjectDir)rsc\*" "$(OutDir)rsc"</Command>
     <ClInclude Include="..\external\corgi\include\corgi\entity_manager.h" />
     <ClInclude Include="..\external\corgi\include\corgi\vector_pool.h" />
     <ClInclude Include="..\external\corgi\include\corgi\version.h" />
+    <ClInclude Include="..\external\glew-1.13.0\include\GL\glew.h" />
+    <ClInclude Include="..\external\glew-1.13.0\include\GL\glxew.h" />
+    <ClInclude Include="..\external\glew-1.13.0\include\GL\wglew.h" />
     <ClInclude Include="src\states\base_state.h" />
     <ClInclude Include="src\states\main_state.h" />
     <ClInclude Include="src\states\state_manager.h" />

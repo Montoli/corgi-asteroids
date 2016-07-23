@@ -22,6 +22,9 @@
     <Filter Include="Source Files\systems">
       <UniqueIdentifier>{a72246ac-113f-4f13-af58-e11bbff42ef9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="glew">
+      <UniqueIdentifier>{eb88358c-a885-4985-982e-bec32544c9ee}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\external\corgi\src\entity_manager.cpp">
@@ -106,6 +109,15 @@
     </ClInclude>
     <ClInclude Include="src\systems\common.h">
       <Filter>Source Files\systems</Filter>
+    </ClInclude>
+    <ClInclude Include="..\external\glew-1.13.0\include\GL\glew.h">
+      <Filter>glew</Filter>
+    </ClInclude>
+    <ClInclude Include="..\external\glew-1.13.0\include\GL\glxew.h">
+      <Filter>glew</Filter>
+    </ClInclude>
+    <ClInclude Include="..\external\glew-1.13.0\include\GL\wglew.h">
+      <Filter>glew</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
