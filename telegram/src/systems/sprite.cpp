@@ -20,13 +20,34 @@ void SpriteSystem::UpdateAllEntities(corgi::WorldTime delta_time) {
 void SpriteSystem::UpdateAllEntities(corgi::WorldTime delta_time) {
 	printf("SpriteSystem - starting update!\n");
 
+	for (auto itr = begin(); itr != end(); ++itr) {
+		corgi::EntityRef entity = itr->entity;
 
-	SDL_Delay(500);
+	}
+
 	printf("SpriteSystem - ending update!\n");
 
 
 }
 
+const char vShaderStr[] =
+"attribute vec4 a_vertex;  \n"
+"attribute vec2 a_tex_uv;    \n"
+"attribute vec4 a_tint;      \n"
+"varying vec4 v_tint;        \n"
+"void main() {                \n"
+"  v_tint = a_tint;          \n"
+"   //v_tint = abs(a_vertex); \n"
+"  //v_tint = vec4(1.0, 1.0, 0.0, 1.0); \n"
+"  gl_Position = a_vertex;// + a_tint; \n"
+"}                           \n";
+
+const char fShaderStr[] =
+"varying vec4 v_tint;      \n"
+"void main() {                                 \n"
+"  gl_FragColor = vec4(v_tint.xyz, 1);                     \n"
+"  //gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); \n"
+"}                                            \n";
 
 
 void SpriteSystem::DeclareDependencies() {
@@ -47,22 +68,24 @@ void SpriteSystem::InitEntity(corgi::EntityRef& entity) {
 }
 
 void SpriteSystem::RenderSprites() {
-//	SDL_BlitSurface(hello_world, NULL, screen_surface, NULL);
+	//	SDL_BlitSurface(hello_world, NULL, screen_surface, NULL);
 
-	//glClearColor(0, 0, 0, 1);
-	//glClear(GL_COLOR_BUFFER_BIT);
-	//SDL_GL_SwapWindow(window);
+		//glClearColor(0, 0, 0, 1);
+		//glClear(GL_COLOR_BUFFER_BIT);
+		//SDL_GL_SwapWindow(window);
 
-	//UserData *userData = esContext->userData;
+		//UserData *userData = esContext->userData;
 
 	CommonComponent* common = entity_manager_->GetSystem<CommonSystem>()->CommonData();
 
-	GLfloat vVertices[] = { 0.0f,  0.5f, 0.0f,
-		-0.5f, -0.5f, 0.0f,
-		0.5f, -0.5f,  0.0f };
+	GLfloat vVertices[] =
+	{ 0.0f,  0.5f, 0.0f,    0.0f, 0.0f,  1.0f, 1.0f, 1.0f, 1.0f,
+		-0.5f, -0.5f, 0.0f,   0.0f, 0.0f,  1.0f, 1.0f, 0.0f, 1.0f,
+		0.5f, -0.5f,  0.0f,   0.0f, 0.0f,  0.0f, 1.0f, 1.0f, 1.0f };
 
 	// Set the viewport
-	glViewport(0, 0, common->screen_size.x(), common->screen_size.y());
+	glViewport(0, 0, static_cast<GLsizei>(common->screen_size.x()),
+		static_cast<GLsizei>(common->screen_size.y()));
 
 	// Clear the color buffer
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -70,13 +93,19 @@ void SpriteSystem::RenderSprites() {
 	// Use the program object
 	glUseProgram(shader_program);
 
-	// Load the vertex data
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, vVertices);
-	glEnableVertexAttribArray(0);
+
+	int stride = sizeof(GLfloat) * 9;
+
+	glVertexAttribPointer(kVertexLoc, 3, GL_FLOAT, GL_FALSE, stride, vVertices + 0);
+	glVertexAttribPointer(kTextureUVLoc, 2, GL_FLOAT, GL_FALSE, stride, vVertices + 3);
+	glVertexAttribPointer(kTintLoc, 4, GL_FLOAT, GL_FALSE, stride, vVertices + 5);
+
+	glEnableVertexAttribArray(kVertexLoc);
+	glEnableVertexAttribArray(kTextureUVLoc);
+	glEnableVertexAttribArray(kTintLoc);
+
 
 	glDrawArrays(GL_TRIANGLES, 0, 3);
-
-	//eglSwapBuffers(esContext->eglDisplay, esContext->eglSurface);
 }
 
 SDL_Surface* SpriteSystem::LoadPNG(std::string path) {
@@ -173,25 +202,9 @@ void SpriteSystem::Init() {
 	}
 	*/
 
-
-	const char vShaderStr[] =
-		"attribute vec4 vPosition;   \n"
-		"void main()                 \n"
-		"{                           \n"
-		"  gl_Position = vPosition;  \n"
-		"}                           \n";
-
-	const char fShaderStr[] =
-		"precision mediump float;                   \n"
-		"void main()                                \n"
-		"{                                          \n"
-		"  gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); \n"
-		"}                                          \n";
-
 	GLuint vertexShader;
 	GLuint fragmentShader;
 	GLuint programObject;
-	GLint linked;
 
 	// Load the vertex/fragment shaders
 	vertexShader = LoadShader(vShaderStr, GL_VERTEX_SHADER);
@@ -208,32 +221,35 @@ void SpriteSystem::Init() {
 	glAttachShader(programObject, vertexShader);
 	glAttachShader(programObject, fragmentShader);
 
+
+
 	// Bind vPosition to attribute 0
-	glBindAttribLocation(programObject, 0, "vPosition");
+	glBindAttribLocation(programObject, kVertexLoc, "a_vertex");
+	glBindAttribLocation(programObject, kTextureUVLoc, "a_tex_uv");
+	glBindAttribLocation(programObject, kTintLoc, "a_tint");
+	
 
 	// Link the program
 	glLinkProgram(programObject);
 
-	/*
-	if(!linked)
-	{
-	GLint infoLen = 0;
+	//assert(kVertexLoc == glGetAttribLocation(programObject, "a_vertex"));
+	//assert(kTextureUVLoc == glGetAttribLocation(programObject, "a_tex_uv"));
+	//assert(kTintLoc == glGetAttribLocation(programObject, "a_tint"));
 
+
+	GLint infoLen = 0;
 	glGetProgramiv(programObject, GL_INFO_LOG_LENGTH, &infoLen);
 
-	if(infoLen > 1)
-	{
-	char* infoLog = malloc(sizeof(char) * infoLen);
+	if(infoLen > 1) {
+		char* infoLog = static_cast<char*>(malloc(sizeof(char) * infoLen));
 
-	glGetProgramInfoLog(programObject, infoLen, NULL, infoLog);
-	esLogMessage("Error linking program:\n%s\n", infoLog);
-
-	free(infoLog);
+		glGetProgramInfoLog(programObject, infoLen, NULL, infoLog);
+		printf("Error linking program:\n%s\n", infoLog);
+		free(infoLog);
+		glDeleteProgram(programObject);
+		assert(false);
 	}
 
-	glDeleteProgram(programObject);
-	return FALSE;
-	}
-	*/
+
 	shader_program = programObject;
 }

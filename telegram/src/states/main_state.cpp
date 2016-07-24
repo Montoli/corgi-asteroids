@@ -10,7 +10,8 @@ MainState::MainState(SDL_Window* window, SDL_Surface* screen_surface,
 	common_data->window = window;
 	common_data->screen_surface = screen_surface;
 	common_data->gl_context = context;
-	common_data->screen_size = vec2(screen_width, screen_height);
+	common_data->screen_size = vec2(static_cast<float>(screen_width),
+														static_cast<float>(screen_height));
 }
 
 
