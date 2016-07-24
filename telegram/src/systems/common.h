@@ -1,6 +1,7 @@
 #ifndef COMMON_H
 #define COMMON_H
 #include "corgi/system.h"
+#include "math_common.h"
 
 #include <SDL.h>
 
@@ -9,6 +10,8 @@
 struct CommonComponent {
 	SDL_Window* window = nullptr;
 	SDL_Surface* screen_surface = nullptr;
+	SDL_GLContext gl_context = nullptr;
+	vec2 screen_size;
 };
 
 

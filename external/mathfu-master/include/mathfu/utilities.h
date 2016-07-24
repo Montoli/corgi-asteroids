@@ -82,12 +82,12 @@
 #endif  // DOXYGEN
 #if !defined(MATHFU_COMPILE_WITHOUT_SIMD_SUPPORT)
 #if defined(__SSE__)
-#define MATHFU_COMPILE_WITH_SIMD
+//#define MATHFU_COMPILE_WITH_SIMD
 #elif defined(__ARM_NEON__)
-#define MATHFU_COMPILE_WITH_SIMD
+//#define MATHFU_COMPILE_WITH_SIMD
 #elif defined(_M_IX86_FP)  // MSVC
 #if _M_IX86_FP >= 1        // SSE enabled
-#define MATHFU_COMPILE_WITH_SIMD
+//#define MATHFU_COMPILE_WITH_SIMD
 #endif  // _M_IX86_FP >= 1
 #endif
 #endif  // !defined(MATHFU_COMPILE_WITHOUT_SIMD_SUPPORT)

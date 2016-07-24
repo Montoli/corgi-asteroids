@@ -119,6 +119,9 @@
     <ClInclude Include="..\external\glew-1.13.0\include\GL\wglew.h">
       <Filter>glew</Filter>
     </ClInclude>
+    <ClInclude Include="src\math_common.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\external\corgi\changelog.txt">

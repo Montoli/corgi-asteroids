@@ -13,11 +13,12 @@
 
 class MainState : public BaseState {
 public:
-	MainState(SDL_Window* window, SDL_Surface* screen_surface);
+	MainState(SDL_Window* window, SDL_Surface* screen_surface,
+		SDL_GLContext context, int screen_width, int screen_height);
 
 
 	virtual void Update(double delta_time);
-  virtual void Render(double delta_time) {}
+	virtual void Render(double delta_time);
 
   virtual void Init();
   virtual void Cleanup() {}

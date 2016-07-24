@@ -3,9 +3,16 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include "corgi/system.h"
+#include "math_common.h"
+#include "GL/glew.h"
+
+
 
 struct SpriteComponent {
-  int num = 42;
+	vec3 position;
+	vec3 scale;
+	int texture;
+	vec4 tint;
 };
 
 
@@ -28,6 +35,8 @@ public:
 
 private:
 	SDL_Surface* hello_world = NULL;
+
+	GLuint shader_program;
 
 };
 

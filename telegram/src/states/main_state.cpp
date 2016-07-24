@@ -1,12 +1,16 @@
 #include "main_state.h"
 #include <SDL.h>
 #include <stdio.h>
+#include "GL/glew.h"
 
 
-MainState::MainState(SDL_Window* window, SDL_Surface* screen_surface) {
+MainState::MainState(SDL_Window* window, SDL_Surface* screen_surface,
+	SDL_GLContext context, int screen_width, int screen_height) {
 	CommonComponent* common_data = common_system_.CommonData();
 	common_data->window = window;
 	common_data->screen_surface = screen_surface;
+	common_data->gl_context = context;
+	common_data->screen_size = vec2(screen_width, screen_height);
 }
 
 
@@ -26,6 +30,16 @@ void MainState::Init() {
 }
 
 
+void MainState::Render(double delta_time) {
+	glClearColor(0, 1, 0, 1);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	sprite_system_.RenderSprites();
+	SDL_GL_SwapWindow(common_system_.CommonData()->window);
+	//SDL_UpdateWindowSurface(common_system_.CommonData()->window);
+}
+
+
 void MainState::Update(double delta_time) {
 	printf("---------------------------------------------\n");
 	printf("start of update!\n");
@@ -35,10 +49,7 @@ void MainState::Update(double delta_time) {
 
   SDL_Event event;
 
-
-	sprite_system_.RenderSprites();
-	SDL_UpdateWindowSurface(common_system_.CommonData()->window);
-
+	
 
   while (SDL_PollEvent(&event)) {
     // We are only worried about SDL_KEYDOWN and SDL_KEYUP events

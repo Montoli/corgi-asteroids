@@ -22,8 +22,6 @@ int main(int argc, char* args[])
   //The surface contained by the window
   SDL_Surface* screen_surface = NULL;
 
-	// init Glew
-	glewInit();
 
   //Initialize SDL
   if (SDL_Init(SDL_INIT_VIDEO) < 0)
@@ -70,33 +68,21 @@ int main(int argc, char* args[])
 			SDL_GL_SetSwapInterval(1);
 
 
-
-
-
-      //Get window surface
-			//screen_surface = SDL_GetWindowSurface(window);
-
-      //Fill the surface white
-      //SDL_FillRect(screen_surface, NULL, SDL_MapRGB(screen_surface->format, 0xFF, 0xFF, 0xFF));
-
-      //Update the surface
-      SDL_UpdateWindowSurface(window);
-
-
-			// now you can make GL calls.
-			glClearColor(0, 1, 0, 1);
-			glClear(GL_COLOR_BUFFER_BIT);
-			SDL_GL_SwapWindow(window);
+			// weird - seems like this has to be initted AFTER SDL has created
+			// the context?
+			glewInit();
 
 
       StateManager state_manager;
 
-      state_manager.PushState(new MainState(window, screen_surface));
+      state_manager.PushState(new MainState(window, screen_surface, gl_context,
+				SCREEN_WIDTH, SCREEN_HEIGHT));
 
       while (!state_manager.IsAppQuitting()) {
         SDL_Delay(1000/60);
-        state_manager.Update(1000 / 60);
-      }
+				state_manager.Update(1000 / 60);
+				state_manager.Render(1000 / 60);
+			}
 			SDL_GL_DeleteContext(gl_context);
 		}
   }

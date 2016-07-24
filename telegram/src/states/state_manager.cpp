@@ -43,7 +43,10 @@ void StateManager::Update(double delta_time) {
 }
 
 void StateManager::Render(double delta_time) {
-  // todo: write this.  Should be basically he same as update.
+	if (state_stack_.size() > 0) {
+		state_stack_[state_stack_.size() - 1]->Render(delta_time);
+	// todo: write this.  Should be basically he same as update.
+	}
 }
 
 
