@@ -15,3 +15,4 @@ Todo:
 * networking!
 * remove the allocation location parameter to addentity.
 * Make smarter multithreading scheduler.
+* change AddEntityToSystem<> -> AddComponent<>

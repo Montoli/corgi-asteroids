@@ -6,32 +6,20 @@
 #include "math_common.h"
 #include "GL/glew.h"
 
-static const int kMaxSprites = 500;
-
-// 4 points, each point contains 3 axis coordinates, 2 UV coordinates, and 4 tint values.
-//static const int kSpriteSize = (sizeof(float) * (3 + 2 + 4) * 4);
-static const int kFloatsPerPoint = 3 + 2 + 4;
-
-
-
-static const int kVertexLoc = 0;
-static const int kTextureUVLoc = 1;
-static const int kTintLoc = 2;
-
-struct SpriteComponent {
-	vec3 position;
-	vec3 scale;
-	int texture;
+struct SpriteData {
+	//int texture; // make this something real!
+	vec2 uv;
+	vec2 size;
 	vec4 tint;
 };
 
 
-class SpriteSystem : public corgi::System<SpriteComponent> {
+class SpriteSystem : public corgi::System<SpriteData> {
 public:
 
 	virtual void Init();
 
-  virtual void UpdateAllEntities(corgi::WorldTime delta_time);
+	virtual void UpdateAllEntities(corgi::WorldTime delta_time);
 
   virtual void DeclareDependencies();
 
@@ -44,17 +32,33 @@ public:
 	SDL_Surface * LoadPNG(std::string path);
 
 private:
+	void AddPointToBuffer(vec4 p, vec2 uv, vec4 tint);
+
+	static const int kMaxSprites = 500;
+
+	// 4 points, each point contains 3 axis coordinates, 2 UV coordinates, and 4 tint values.
+	//static const int kSpriteSize = (sizeof(float) * (3 + 2 + 4) * 4);
+	static const int kFloatsPerPoint = 3 + 2 + 4;
+
+	static const int kTotalBufferSize = kMaxSprites * kFloatsPerPoint;
+
+	static const int kVertexLoc = 0;
+	static const int kTextureUVLoc = 1;
+	static const int kTintLoc = 2;
+
+
 	SDL_Surface* hello_world = NULL;
 
 	GLuint shader_program;
 
-
-
-	GLfloat* vertex_buffer[kMaxSprites * kFloatsPerPoint];
+	GLfloat vertex_buffer_[kTotalBufferSize];
+	
+	int buffer_length_;
+	int buffer_count_;
 
 };
 
-CORGI_REGISTER_SYSTEM(SpriteSystem, SpriteComponent)
+CORGI_REGISTER_SYSTEM(SpriteSystem, SpriteData)
 
 
 #endif // SPRITE_SYSTEM_H

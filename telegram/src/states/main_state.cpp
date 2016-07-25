@@ -28,6 +28,30 @@ void MainState::Init() {
 
   test_system2_.AddEntity(entity);
   //entity_manager_.AddEntityToSystem(entity);
+
+	corgi::EntityRef spritetest;
+	SpriteData* sprite_data;
+	TransformData* transform_data;
+
+	spritetest = entity_manager_.AllocateNewEntity();
+	entity_manager_.AddEntityToSystem<SpriteSystem>(spritetest);
+	sprite_data = entity_manager_.GetComponentData<SpriteData>(spritetest);
+	transform_data = entity_manager_.GetComponentData<TransformData>(spritetest);
+
+	sprite_data->tint = vec4(1.0f, 0.5f, 0.25f, 1.0f);
+	transform_data->position = vec3(200.0f, 200.0f, 0.0f);
+	sprite_data->size = vec2(100, 50);
+	transform_data->scale = vec2(2.0f, 2.0f);
+	//------
+	spritetest = entity_manager_.AllocateNewEntity();
+	entity_manager_.AddEntityToSystem<SpriteSystem>(spritetest);
+	sprite_data = entity_manager_.GetComponentData<SpriteData>(spritetest);
+	transform_data = entity_manager_.GetComponentData<TransformData>(spritetest);
+
+	sprite_data->tint = vec4(0.5f, 1.0f, 0.25f, 1.0f);
+	transform_data->position = vec3(300.0f, 50.0f, 0.0f);
+	sprite_data->size = vec2(40, 60);
+	transform_data->scale = vec2(1.0f, 1.0f);
 }
 
 
