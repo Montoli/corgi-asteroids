@@ -29,14 +29,14 @@ void MainState::Init() {
   entity_manager_.FinalizeSystemList();
 
   test_system2_.AddEntity(entity);
-  //entity_manager_.AddEntityToSystem(entity);
+  //entity_manager_.AddComponent(entity);
 
 	corgi::EntityRef spritetest;
 	SpriteData* sprite_data;
 	TransformData* transform_data;
 
 	spritetest = entity_manager_.AllocateNewEntity();
-	entity_manager_.AddEntityToSystem<SpriteSystem>(spritetest);
+	entity_manager_.AddComponent<SpriteSystem>(spritetest);
 	sprite_data = entity_manager_.GetComponentData<SpriteData>(spritetest);
 	transform_data = entity_manager_.GetComponentData<TransformData>(spritetest);
 
@@ -46,7 +46,7 @@ void MainState::Init() {
 	transform_data->scale = vec2(2.0f, 2.0f);
 	//------
 	spritetest = entity_manager_.AllocateNewEntity();
-	entity_manager_.AddEntityToSystem<SpriteSystem>(spritetest);
+	entity_manager_.AddComponent<SpriteSystem>(spritetest);
 	sprite_data = entity_manager_.GetComponentData<SpriteData>(spritetest);
 	transform_data = entity_manager_.GetComponentData<TransformData>(spritetest);
 
@@ -80,7 +80,7 @@ void MainState::Update(double delta_time) {
 	//if (rnd() < 0.2) {
 	{
 		corgi::EntityRef particle_thing = entity_manager_.AllocateNewEntity();
-		entity_manager_.AddEntityToSystem<FountainProjectile>(particle_thing);
+		entity_manager_.AddComponent<FountainProjectile>(particle_thing);
 		
 	}
 		

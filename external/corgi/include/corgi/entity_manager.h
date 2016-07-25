@@ -151,12 +151,12 @@ class EntityManager {
   /// @param[in] entity An EntityRef that points to the Entity that is being
   /// added to the System.
   template <typename T>
-  void AddEntityToSystem(EntityRef entity) {
+  void AddComponent(EntityRef entity) {
     SystemId id =
         static_cast<SystemId>(SystemIdLookup<T>::system_id);
     assert(id != kInvalidSystem);
     assert(id < systems_.size());
-    AddEntityToSystem(entity, id);
+    AddComponent(entity, id);
   }
 
   /// @brief A helper function for getting a particular System, given the
@@ -323,7 +323,7 @@ class EntityManager {
   /// registered with the System.
   /// @param[in] system_id The component ID of the System that should
   /// be registered with the Entity.
-  void AddEntityToSystem(EntityRef entity, SystemId system_id);
+  void AddComponent(EntityRef entity, SystemId system_id);
 
   /// @brief Deletes all the Entities that are marked for deletion.
   ///

@@ -83,7 +83,7 @@ void EntityManager::RemoveAllSystems(EntityRef entity) {
   }
 }
 
-void EntityManager::AddEntityToSystem(EntityRef entity,
+void EntityManager::AddComponent(EntityRef entity,
                                          SystemId system_id) {
   SystemInterface* system = GetSystem(system_id);
   assert(system != nullptr);
