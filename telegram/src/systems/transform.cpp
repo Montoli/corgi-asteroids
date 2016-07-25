@@ -14,18 +14,8 @@ void TransformSystem::Init() {
 
 
 void TransformSystem::UpdateAllEntities(corgi::WorldTime delta_time) {
-	printf("TransformSystem - starting update!\n");
+//	printf("TransformSystem - starting update!\n");
 
-
-	// illegal without declaring accesss dependency...
-
-	/*
-	for (auto itr = begin(); itr != end(); ++itr) {
-	corgi::EntityRef entity = itr->entity;
-	TestData2* testdata = Data<TestData2>(entity);
-	}
-	*/
-	SDL_Delay(500);
-	printf("TransformSystem - ending update!\n");
+	//printf("TransformSystem - ending update!\n");
 
 }

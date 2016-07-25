@@ -24,8 +24,6 @@ void SpriteSystem::AddPointToBuffer(vec4 p, vec2 uv, vec4 tint) {
 }
 
 void SpriteSystem::UpdateAllEntities(corgi::WorldTime delta_time) {
-	printf("SpriteSystem - starting update!\n");
-
 	// build our vertex buffer:
 	buffer_length_ = 0;
 	buffer_count_ = 0;
@@ -59,9 +57,8 @@ void SpriteSystem::UpdateAllEntities(corgi::WorldTime delta_time) {
 		AddPointToBuffer(p3, vec2(0, 0), sprite_data->tint);
 		AddPointToBuffer(p4, vec2(0, 0), sprite_data->tint);
 
-
+		if (buffer_length_ >= kTotalBufferSize - 10) break;
 	}
-	printf("SpriteSystem - ending update!\n");
 }
 
 const char vShaderStr[] =
@@ -85,6 +82,7 @@ const char fShaderStr[] =
 void SpriteSystem::DeclareDependencies() {
   DependOn<TransformSystem>(corgi::kExecuteAfter, corgi::kReadAccess);
 	DependOn<CommonSystem>(corgi::kNoOrderDependency, corgi::kReadAccess);
+	SetIsThreadSafe(true);
 }
 
 void SpriteSystem::Cleanup() {
@@ -134,11 +132,6 @@ void SpriteSystem::RenderSprites() {
 
 	int stride = sizeof(GLfloat) * 9;
 
-	/*
-	glVertexAttribPointer(kVertexLoc, 3, GL_FLOAT, GL_FALSE, stride, vVertices + 0);
-	glVertexAttribPointer(kTextureUVLoc, 2, GL_FLOAT, GL_FALSE, stride, vVertices + 3);
-	glVertexAttribPointer(kTintLoc, 4, GL_FLOAT, GL_FALSE, stride, vVertices + 5);
-	*/
 	glVertexAttribPointer(kVertexLoc, 3, GL_FLOAT, GL_FALSE, stride, vertex_buffer_ + 0);
 	glVertexAttribPointer(kTextureUVLoc, 2, GL_FLOAT, GL_FALSE, stride, vertex_buffer_ + 3);
 	glVertexAttribPointer(kTintLoc, 4, GL_FLOAT, GL_FALSE, stride, vertex_buffer_ + 5);

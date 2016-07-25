@@ -8,6 +8,8 @@
 #include "systems/transform.h"
 #include "systems/sprite.h"
 #include "systems/common.h"
+#include "systems/physics.h"
+#include "systems/fountain_projectile.h"
 
 #include "base_state.h"
 
@@ -34,6 +36,9 @@ private:
 	CommonSystem common_system_;
 	SpriteSystem sprite_system_;
 	TransformSystem transform_system_;
+	PhysicsSystem physics_system_;
+	FountainProjectile fountain_projectiles_;
+
 
 
 

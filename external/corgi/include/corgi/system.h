@@ -356,6 +356,10 @@ class System : public SystemInterface {
     return entity_manager_->GetComponentData<ComponentDataType>(entity);
   }
 
+	virtual const char* Name() {
+		return SystemIdLookup<T>::system_name;
+	}
+
   /// @brief A utility function for checking if an entity is registered with
   /// a particular component.
   ///
@@ -447,7 +451,6 @@ class System : public SystemInterface {
 
     if (order_dependency == kExecuteBefore) {
       assert(entity_manager_);
-      assert(entity_manager_->is_system_list_final());
       SystemInterface* system = entity_manager_->GetSystem(system_id);
       assert(system);
 

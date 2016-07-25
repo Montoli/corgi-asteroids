@@ -6,7 +6,7 @@
 CORGI_DEFINE_SYSTEM(TestSystem, TestData)
 
 void TestSystem::UpdateAllEntities(corgi::WorldTime delta_time) {
-    printf("Test System 1 - starting update!\n");
+//    printf("Test System 1 - starting update!\n");
 
 
   // illegal without declaring accesss dependency...
@@ -17,8 +17,8 @@ void TestSystem::UpdateAllEntities(corgi::WorldTime delta_time) {
     TestData2* testdata = Data<TestData2>(entity);
   }
   */
-		SDL_Delay(500);
-		printf("Test System 1 - ending update!\n");
+//		SDL_Delay(500);
+		//printf("Test System 1 - ending update!\n");
 
 }
 

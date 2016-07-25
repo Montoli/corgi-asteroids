@@ -7,6 +7,7 @@ New in version 2.0.0:
 * Real dependency tracking
 * Support functions for multighreading.  (accessdependencies, etc)
 * Automatic Multithreading scheduling
+* Added the ability to get the name of a system.  (automagically populated!)
 
 rename systemindex->componentindex
 rename 

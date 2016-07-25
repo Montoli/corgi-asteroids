@@ -35,12 +35,13 @@ private:
 	void AddPointToBuffer(vec4 p, vec2 uv, vec4 tint);
 
 	static const int kMaxSprites = 500;
+	static const int kPointsPerSprite = 6;
 
 	// 4 points, each point contains 3 axis coordinates, 2 UV coordinates, and 4 tint values.
 	//static const int kSpriteSize = (sizeof(float) * (3 + 2 + 4) * 4);
 	static const int kFloatsPerPoint = 3 + 2 + 4;
 
-	static const int kTotalBufferSize = kMaxSprites * kFloatsPerPoint;
+	static const int kTotalBufferSize = kMaxSprites * kPointsPerSprite * kFloatsPerPoint;
 
 	static const int kVertexLoc = 0;
 	static const int kTextureUVLoc = 1;

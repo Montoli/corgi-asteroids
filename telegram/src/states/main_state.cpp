@@ -23,6 +23,8 @@ void MainState::Init() {
   entity_manager_.RegisterSystem(&test_system2_);
 	entity_manager_.RegisterSystem(&transform_system_);
 	entity_manager_.RegisterSystem(&sprite_system_);
+	entity_manager_.RegisterSystem(&physics_system_);
+	entity_manager_.RegisterSystem(&fountain_projectiles_);
 
   entity_manager_.FinalizeSystemList();
 
@@ -52,6 +54,7 @@ void MainState::Init() {
 	transform_data->position = vec3(300.0f, 50.0f, 0.0f);
 	sprite_data->size = vec2(40, 60);
 	transform_data->scale = vec2(1.0f, 1.0f);
+	transform_data->orientation = quat::FromAngleAxis(2.3f, vec3(0, 0, 1));
 }
 
 
@@ -66,15 +69,23 @@ void MainState::Render(double delta_time) {
 
 
 void MainState::Update(double delta_time) {
-	printf("---------------------------------------------\n");
-	printf("start of update!\n");
-	printf("---------------------------------------------\n");
+	//printf("---------------------------------------------\n");
+	//printf("start of update!\n");
+	//printf("---------------------------------------------\n");
 
   entity_manager_.UpdateSystems(delta_time);
 
   SDL_Event event;
 
-	
+	//if (rnd() < 0.2) {
+	{
+		corgi::EntityRef particle_thing = entity_manager_.AllocateNewEntity();
+		entity_manager_.AddEntityToSystem<FountainProjectile>(particle_thing);
+		
+	}
+		
+
+
 
   while (SDL_PollEvent(&event)) {
     // We are only worried about SDL_KEYDOWN and SDL_KEYUP events

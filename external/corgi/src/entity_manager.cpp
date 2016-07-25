@@ -115,7 +115,6 @@ void EntityManager::FinalizeSystemList() {
 	}
 }
 
-
 void* EntityManager::GetSystemDataAsVoid(EntityRef entity,
                                             SystemId system_id) {
   return systems_[system_id]
@@ -129,18 +128,6 @@ const void* EntityManager::GetSystemDataAsVoid(
              ? systems_[system_id]->GetSystemDataAsVoid(entity)
              : nullptr;
 }
-
-/*
-void EntityManager::UpdateSystems(WorldTime delta_time) {
-  // Assert if you haven't finalized the system list.
-  assert(is_system_list_final_);
-  // Update all the registered systems.
-  for (size_t i = 0; i < systems_.size(); i++) {
-    if (systems_[i]) systems_[i]->UpdateAllEntities(delta_time);
-  }
-  DeleteMarkedEntities();
-}
-*/
 
 void EntityManager::UpdateSystems(WorldTime delta_time) {
 	// Assert if you haven't finalized the system list.
@@ -175,10 +162,8 @@ void EntityManager::UpdateSystems(WorldTime delta_time) {
 			SDL_CondWait(worker_thread_cond_,
 				worker_thread_mutex_);
 			SDL_UnlockMutex(worker_thread_mutex_);
-			printf("--Main woke up!\n");
 		} else {
 			SDL_UnlockMutex(worker_thread_mutex_);
-			printf("--Main found something to do...\n");
 
 			SystemInterface* system = GetSystem(system_id);
 			system->UpdateAllEntities(delta_time_);
@@ -189,19 +174,28 @@ void EntityManager::UpdateSystems(WorldTime delta_time) {
 
 	// Sanity checking - we should not be reading/writing from anything
 	// when we are done with updates.
+	SDL_LockMutex(bookkeeping_mutex_);
 	for (size_t i = 0; i < systems_.size(); i++) {
 		SystemId system_id = static_cast<SystemId>(i);
+		if (systems_being_read_from_[system_id] != 0) {
+			printf("System not finished: [%s]\n", GetSystem(system_id)->Name());
+		}
 		assert(systems_being_read_from_[system_id] == 0);
 		assert(systems_being_written_to_[system_id] == 0);
 	}
+	SDL_UnlockMutex(bookkeeping_mutex_);
 
 	DeleteMarkedEntities();
 }
 
-
 bool EntityManager::IsSystemUpdateComplete() {
-	return !(unupdated_systems_.size() +
+	// Have to lock the bookkeeping mutex, so that it doesn't change 
+	// while we're adding this.  (Which will lead to false positives...)
+	SDL_LockMutex(bookkeeping_mutex_);
+	bool result = !(unupdated_systems_.size() +
 		currently_updating_systems_.size() > 0);
+	SDL_UnlockMutex(bookkeeping_mutex_);
+	return result;
 }
 
 void EntityManager::WakeWorkerThreads() {

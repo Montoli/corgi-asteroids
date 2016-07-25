@@ -73,8 +73,9 @@ struct SystemIdLookup {};
 #define CORGI_REGISTER_SYSTEM_ID_LOOKUP(DataType) \
   namespace corgi {                                  \
   template <>                                        \
-  struct SystemIdLookup<DataType> {               \
-    static SystemId system_id;                 \
+  struct SystemIdLookup<DataType> {                  \
+    static SystemId system_id;                       \
+    static const char* system_name;									 \
   };                                                 \
   }
 
@@ -88,6 +89,7 @@ struct SystemIdLookup {};
 #define CORGI_DEFINE_SYSTEM_ID_LOOKUP(DataType)                           \
   namespace corgi {                                                          \
   SystemId SystemIdLookup<DataType>::system_id = kInvalidSystem; \
+  const char* SystemIdLookup<DataType>::system_name = #DataType; \
   }
 
 /// @}

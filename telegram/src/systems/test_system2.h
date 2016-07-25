@@ -14,8 +14,6 @@ public:
 
   virtual void DeclareDependencies();
 
-  virtual void InitEntity(corgi::EntityRef& entity);
-
 };
 
 CORGI_REGISTER_SYSTEM(TestSystem2, TestData2)

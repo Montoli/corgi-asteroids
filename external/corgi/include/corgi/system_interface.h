@@ -123,6 +123,12 @@ public:
 	/// nullptr if the data does not exist.
 	virtual const void* GetSystemDataAsVoid(const EntityRef&) const = 0;
 
+	/// @ brief Returns the name of the system, as a string.  Useful
+	/// for debugging.
+	///
+	/// @return Returns the name of the system, as a string.
+	virtual const char* Name() = 0;
+
 	/// @brief This function is called after the System is added to the
 	/// EntityManager. (i.e. This typically happens once, at the beginning
 	/// of the game before any Entities are added.)

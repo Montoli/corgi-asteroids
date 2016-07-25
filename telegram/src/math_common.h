@@ -10,4 +10,11 @@ using mathfu::vec4;
 using mathfu::mat3;
 using mathfu::mat4;
 
+
+float rnd();
+
+
+
+
+
 #endif // MATH_COMMON_H
