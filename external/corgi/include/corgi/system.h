@@ -136,7 +136,7 @@ class System : public SystemInterface {
     }
     // No existing data, so we allocate some and return it:
 		component_data_.push_back(ComponentData());
-		SystemIndex index = static_cast<SystemIndex>(component_data_.size() - 1);
+		ComponentIndex index = static_cast<ComponentIndex>(component_data_.size() - 1);
     component_index_lookup_[entity->entity_id()] = index;
 		component_data_[index].entity = entity;
     AddSystemDependencies(entity);
@@ -170,7 +170,7 @@ class System : public SystemInterface {
     // if you want to double-check if data exists before removing it.
     assert(HasDataForEntity(entity));
     RemoveEntityInternal(entity);
-		SystemIndex index = component_index_lookup_[entity->entity_id()];
+		ComponentIndex index = component_index_lookup_[entity->entity_id()];
 
 		component_index_lookup_.erase(entity->entity_id());
 		if (component_data_.size() > 1) {
@@ -619,7 +619,7 @@ class System : public SystemInterface {
   ///
   /// @brief A map for translating unique entity IDs into vector
   /// indexes.
-  std::unordered_map<EntityIdType, SystemIndex> component_index_lookup_;
+  std::unordered_map<EntityIdType, ComponentIndex> component_index_lookup_;
 };
 /// @}
 

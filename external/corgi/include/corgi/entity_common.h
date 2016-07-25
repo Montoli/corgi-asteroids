@@ -50,11 +50,11 @@ const SystemId kInvalidSystem = static_cast<SystemId>(-1);
 /// @brief A typedef that represents time in the game.
 typedef double WorldTime;
 
-/// @typedef SystemIndex
+/// @typedef ComponentIndex
 ///
-/// @brief A SystemIndex is a value used to represent the location of a piece
+/// @brief A ComponentIndex is a value used to represent the location of a piece
 /// of ComponentData, normally inside of a VectorPool.
-typedef uint16_t SystemIndex;
+typedef uint16_t ComponentIndex;
 
 /// @var kUnusedComponentIndex
 ///
@@ -64,8 +64,8 @@ typedef uint16_t SystemIndex;
 /// System they know about, this value is used as a default value
 /// to indicate that a specific System is not registered with
 /// a given Entity.
-static const SystemIndex kInvalidSystemIndex =
-    static_cast<SystemIndex>(-1);
+static const ComponentIndex kInvalidSystemIndex =
+    static_cast<ComponentIndex>(-1);
 
 /// @typedef EntityIdType
 ///
