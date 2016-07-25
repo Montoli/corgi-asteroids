@@ -27,6 +27,7 @@ void SpriteSystem::UpdateAllEntities(corgi::WorldTime delta_time) {
 	// build our vertex buffer:
 	buffer_length_ = 0;
 	buffer_count_ = 0;
+	//printf("updating %d sprites!\n", component_data_.size());
 	for (auto itr = begin(); itr != end(); ++itr) {
 		corgi::EntityRef entity = itr->entity;
 		TransformData* transform_data = Data<TransformData>(entity);

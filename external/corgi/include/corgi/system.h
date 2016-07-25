@@ -93,7 +93,8 @@ class System : public SystemInterface {
   ///
   /// @brief An iterator to iterate through all of the Entities in the
   /// System.
-  typedef typename VectorPool<ComponentData>::Iterator EntityIterator;
+  //typedef typename VectorPool<ComponentData>::Iterator EntityIterator;
+	typedef typename std::vector<ComponentData>::iterator EntityIterator;
 
   /// @typedef value_type
   ///
@@ -134,14 +135,13 @@ class System : public SystemInterface {
       return GetComponentData(entity);
     }
     // No existing data, so we allocate some and return it:
-    SystemIndex index = static_cast<SystemIndex>(
-        component_data_.GetNewElement(alloc_location).index());
+		component_data_.push_back(ComponentData());
+		SystemIndex index = static_cast<SystemIndex>(component_data_.size() - 1);
     component_index_lookup_[entity->entity_id()] = index;
-    ComponentData* component_data = component_data_.GetElementData(index);
-    component_data->entity = entity;
+		component_data_[index].entity = entity;
     AddSystemDependencies(entity);
     InitEntity(entity);
-    return &(component_data->data);
+    return &(component_data_[index].data);
   }
 
   /// @brief Adds an Entity to the list that this System is tracking.
@@ -170,29 +170,16 @@ class System : public SystemInterface {
     // if you want to double-check if data exists before removing it.
     assert(HasDataForEntity(entity));
     RemoveEntityInternal(entity);
-    component_data_.FreeElement(GetComponentDataIndex(entity));
-    component_index_lookup_.erase(entity->entity_id());
+		SystemIndex index = component_index_lookup_[entity->entity_id()];
+
+		component_index_lookup_.erase(entity->entity_id());
+		if (component_data_.size() > 1) {
+			component_data_[index] = std::move(component_data_[component_data_.size() - 1]);
+			component_index_lookup_[component_data_[index].entity->entity_id()] = index;
+		}
+		component_data_.pop_back();
   }
 
-  /// @brief Removes an Entity from the list of Entities.
-  ///
-  /// This is done by marking the Entity as no longer using this System,
-  /// calling the destructor on the data, and returning the memory to the
-  /// memory pool.
-  ///
-  /// @param[in,out] iter An EntityIterator that references an Entity that
-  /// should
-  /// be removed.
-  ///
-  /// @return Returns an iterator to the next Entity after the one that was
-  /// just removed.
-  virtual EntityIterator RemoveEntity(EntityIterator iter) {
-    EntityRef entity = iter->entity;
-    RemoveEntityInternal(entity);
-    EntityIterator new_iter = component_data_.FreeElement(iter);
-    component_index_lookup_.erase(entity->entity_id());
-    return new_iter;
-  }
 
   /// @brief Gets an iterator that will iterate over every Entity associated
   /// with the System, starting from the beginning.
@@ -270,7 +257,7 @@ class System : public SystemInterface {
     if (data_index == kInvalidSystemIndex) {
       return nullptr;
     }
-    ComponentData* element_data = component_data_.GetElementData(data_index);
+    ComponentData* element_data = &(component_data_[data_index]);
     return (element_data != nullptr) ? &(element_data->data) : nullptr;
   }
 
@@ -288,7 +275,7 @@ class System : public SystemInterface {
   /// does not exist.
   T* GetComponentData(const EntityRef& entity) {
     size_t data_index = GetComponentDataIndex(entity);
-    if (data_index >= component_data_.Size()) {
+    if (data_index >= component_data_.size()) {
       return nullptr;
     }
     return GetComponentData(data_index);
@@ -327,9 +314,9 @@ class System : public SystemInterface {
 
   /// @brief Clears all tracked System data.
   void virtual ClearComponentData() {
-    for (auto iter = component_data_.begin(); iter != component_data_.end();
-         iter = RemoveEntity(iter)) {
-    }
+		while (component_index_lookup_.size() > 0) {
+			RemoveEntity(component_data_[component_index_lookup_.begin()->second].entity);
+		}
   }
 
   /// @brief A utility function for retrieving the System data for an
@@ -619,7 +606,8 @@ class System : public SystemInterface {
   /// @var component_data_
   ///
   /// @brief Storage for all of the data for the System.
-  VectorPool<ComponentData> component_data_;
+  //VectorPool<ComponentData> component_data_;
+	std::vector<ComponentData> component_data_;
 
   /// @var entity_manager_
   ///
@@ -629,7 +617,7 @@ class System : public SystemInterface {
 
   /// @var component_index_lookup_
   ///
-  /// @brief A map for translating unique entity IDs into vectorpool
+  /// @brief A map for translating unique entity IDs into vector
   /// indexes.
   std::unordered_map<EntityIdType, SystemIndex> component_index_lookup_;
 };
