@@ -22,7 +22,6 @@
 #include <memory>
 #include "corgi/entity_common.h"
 #include "corgi/entity_manager.h"
-//#include "corgi/vector_pool.h"
 
 namespace corgi {
 

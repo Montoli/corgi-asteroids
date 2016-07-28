@@ -9,11 +9,15 @@ New in version 2.0.0:
 * Automatic Multithreading scheduling
 * Added the ability to get the name of a system.  (automagically populated!)
 * renamed AddEntityToSystem<> -> AddComponent<>
+* removed the allocation location parameter to addentity.
+* fully removed vector pools - Everything now uses either vectors or unordered_maps under the hood.
+* Added new accessor functions to replace some of the functionality that used to live on the entity objects.
+  * EntityManager::IsEntityValid will tell you if an entity is still in the system, or has been deleted.
+  * EntityManager::IsMarkedForDeletion will tell you if an entity is going to go away at the end of the next update.
 
 
 rename 
 Todo:
 * Specialization for systems that have no data
 * networking!
-* remove the allocation location parameter to addentity.
 * Make smarter multithreading scheduler.

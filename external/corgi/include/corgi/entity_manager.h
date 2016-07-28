@@ -20,9 +20,7 @@
 #include <map>
 #include "corgi/system_id_lookup.h"
 #include "corgi/system_interface.h"
-//#include "corgi/entity.h"
 #include "corgi/entity_common.h"
-//#include "corgi/vector_pool.h"
 #include "corgi/version.h"
 #include <cassert>
 
@@ -330,6 +328,25 @@ class EntityManager {
   ///
   /// @warning Do NOT call this function during any form of Entity update!
   void DeleteMarkedEntities();
+
+	/// @brief Checks if an entity is still valid.  A valid entity is
+	/// defined as one that is still active, and has not been deleted.
+	/// Note that entities that have been marked for deletion are still
+	/// considered valid until they are actually deleted.
+	///
+	/// @param[in] entity An entity to check for validity.
+	///
+	/// @return Returns True if the entity is valid, false otherwise.
+	bool IsEntityValid(Entity entity);
+
+	/// @brief Checks if an entity is marked for deletion.  Marked entities
+	/// will be removed at the end of the next update.
+	///
+	/// @param[in] entity An entity to check.
+	///
+	/// @return Returns True if the entity is marked for deletion,
+	/// false otherwise.
+	bool IsEntityMarkedForDeletion(Entity entity);
 
   /// @brief Boolean that tracks whether the list of systems has been finalized.
   /// (via FinalizeSystemList)  Once FinalizeSystemList has been called, entities are

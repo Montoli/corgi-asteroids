@@ -75,6 +75,14 @@ void EntityManager::DeleteMarkedEntities() {
 	entities_to_delete_.clear();
 }
 
+bool EntityManager::IsEntityValid(Entity entity) {
+	return entities_.find(entity) != entities_.end();
+}
+
+bool EntityManager::IsEntityMarkedForDeletion(Entity entity) {
+	return entities_to_delete_.find(entity) != entities_to_delete_.end();
+}
+
 void EntityManager::RemoveAllSystems(Entity entity) {
   for (SystemId i = 0; i < systems_.size(); i++) {
     if (systems_[i] != nullptr && systems_[i]->HasDataForEntity(entity)) {

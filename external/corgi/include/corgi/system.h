@@ -21,7 +21,6 @@
 #include "corgi/system_interface.h"
 #include "corgi/entity_common.h"
 #include "corgi/entity_manager.h"
-#include "corgi/vector_pool.h"
 
 namespace corgi {
 
@@ -129,7 +128,7 @@ class System : public SystemInterface {
   /// @note If you have already registered for this System, this
   /// will just return a reference to the existing data and will not change
   /// anything.
-  T* AddEntity(Entity entity, AllocationLocation alloc_location) {
+  T* AddEntity(Entity entity) {
     if (HasDataForEntity(entity)) {
       return GetComponentData(entity);
     }
@@ -142,17 +141,6 @@ class System : public SystemInterface {
     InitEntity(entity);
     return &(component_data_[index].data);
   }
-
-  /// @brief Adds an Entity to the list that this System is tracking.
-  ///
-  /// @note Entities added through this function allocate from the back of the
-  /// memory pool.
-  ///
-  /// @param[in,out] entity An Entity reference used to add an Entity to the
-  /// list of Entities that this System keeps track of.
-  ///
-  /// @return Returns the data structure associated with the System.
-  T* AddEntity(Entity entity) { return AddEntity(entity, kAddToBack); }
 
   /// @brief Removes an Entity from the list of Entities.
   ///
