@@ -25,7 +25,7 @@ public:
 
 	virtual void Cleanup();
 
-	virtual void InitEntity(corgi::EntityRef& entity);
+	virtual void InitEntity(corgi::Entity entity);
 
 	void RenderSprites();
 

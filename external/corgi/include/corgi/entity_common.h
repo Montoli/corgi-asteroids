@@ -56,23 +56,14 @@ typedef double WorldTime;
 /// of ComponentData, normally inside of a VectorPool.
 typedef uint16_t ComponentIndex;
 
-/// @var kUnusedComponentIndex
-///
-/// @brief A sentinel value to represent an invalid System.
-///
-/// Since all Entities contain an array corresponding to every
-/// System they know about, this value is used as a default value
-/// to indicate that a specific System is not registered with
-/// a given Entity.
-static const ComponentIndex kInvalidSystemIndex =
-    static_cast<ComponentIndex>(-1);
-
 /// @typedef EntityIdType
 ///
 /// @brief A EntityIdType is a value used to uniquely represent an entity
 /// in various internal structures.  In general, CORGI users should avoid
 /// using this directly, and should instead refer to entities via EntityRefs.
-typedef uint16_t EntityIdType;
+typedef uint32_t EntityIdType;
+
+typedef EntityIdType Entity;
 
 /// @var kInvalidEntityId
 ///

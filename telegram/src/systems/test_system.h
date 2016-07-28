@@ -11,7 +11,7 @@ public:
 
 virtual void UpdateAllEntities(corgi::WorldTime delta_time);
 
-virtual void InitEntity(corgi::EntityRef& entity);
+virtual void InitEntity(corgi::Entity entity);
 
 };
 

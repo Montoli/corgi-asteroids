@@ -20,10 +20,9 @@
 #include <stdint.h>
 #include <functional>
 #include <memory>
-#include "corgi/entity.h"
 #include "corgi/entity_common.h"
 #include "corgi/entity_manager.h"
-#include "corgi/vector_pool.h"
+//#include "corgi/vector_pool.h"
 
 namespace corgi {
 
@@ -32,23 +31,6 @@ class EntityManager;
 /// @file
 /// @addtogroup corgi_component
 /// @{
-///
-/// @typedef EntityRef
-///
-/// @brief A typedef that should be used as the primary way to reference
-/// an Entity.
-///
-/// An EntityRef can be treated like a pointer to an Entity. In most cases,
-/// it functions interchangeably with a normal pointer, but it also contains
-/// extra functionality for determining if the EntityRef is invalid. For
-/// instance, if the Entity that the EntityRef points to is deallocated, the
-/// EntityRef will no longer be valid (even if new data exists in the same
-/// memory location previously held by the deallocated Entity).
-///
-/// EntityRefs are typically passed by reference or const reference. If an
-/// EntityRef is const, then you can only access the underlying Entity data
-/// in a read-only manner.
-typedef VectorPool<corgi::Entity>::VectorPoolReference EntityRef;
 
 /// @class SystemInterface
 ///
@@ -72,15 +54,15 @@ public:
 	/// @note Usually you will want to use System::AddEntity, since that
 	/// returns a pointer to the data assigned to the System.
 	///
-	/// @param[in,out] entity An EntityRef reference to the Entity being added to
+	/// @param[in,out] entity An Entity reference to the Entity being added to
 	/// this System.
-	virtual void AddEntityGenerically(EntityRef& entity) = 0;
+	virtual void AddEntityGenerically(Entity entity) = 0;
 
 	/// @brief Remove an Entity from the System's list.
 	///
-	/// @param[in] entity An EntityRef reference to the Entity being remove
+	/// @param[in] entity An Entity reference to the Entity being remove
 	/// from this System.
-	virtual void RemoveEntity(EntityRef& entity) = 0;
+	virtual void RemoveEntity(Entity entity) = 0;
 
 	/// @brief Update all Entities that contain this System.
 	///
@@ -90,7 +72,7 @@ public:
 
 	/// @brief Returns true if this component has data associated with the
 	/// entity provided.
-	virtual bool HasDataForEntity(const EntityRef&) = 0;
+	virtual bool HasDataForEntity(const Entity) = 0;
 
 	/// @brief Clears all System data, effectively disassociating this
 	/// System from any Entities.
@@ -107,7 +89,7 @@ public:
 	///
 	/// @return Returns the Entity's data as a void pointer, or returns a nullptr
 	/// if the data does not exist.
-	virtual void* GetSystemDataAsVoid(const EntityRef&) = 0;
+	virtual void* GetSystemDataAsVoid(const Entity) = 0;
 
 	/// @brief Gets the data for a given ntity as a const void pointer.
 	///
@@ -121,7 +103,7 @@ public:
 	///
 	/// @return Returns the Entity's data as a const void pointer, or returns a
 	/// nullptr if the data does not exist.
-	virtual const void* GetSystemDataAsVoid(const EntityRef&) const = 0;
+	virtual const void* GetSystemDataAsVoid(const Entity) const = 0;
 
 	/// @ brief Returns the name of the system, as a string.  Useful
 	/// for debugging.
@@ -153,28 +135,28 @@ public:
   /// @brief Called by the EntityManager every time an Entity is added to this
   /// System.
   ///
-  /// @param[in] entity An EntityRef pointing to an Entity that is being added
+  /// @param[in] entity An Entity pointing to an Entity that is being added
   /// to this System and may need initialized.
-  virtual void InitEntity(EntityRef& entity) = 0;
+  virtual void InitEntity(Entity entity) = 0;
 
   /// @brief Creates and populates an Entity from raw data. Components that want
   /// to be able to be constructed via the EntityFactory need to implement this.
   ///
-  /// @param[in,out] entity An EntityRef that points to an Entity that is being
+  /// @param[in,out] entity An Entity that points to an Entity that is being
   /// added from the raw data.
   /// @param[in] data A void pointer to the raw data.
-  virtual void AddFromRawData(EntityRef& entity, const void* data) = 0;
+  virtual void AddFromRawData(Entity entity, const void* data) = 0;
 
   /// @brief Serializes a System's data for a specific Entity.
   ///
   /// If you do not support this functionality, this function
   /// should return a nullptr.
   ///
-  /// @param[in] entity An EntityRef reference to an Entity whose raw data
+  /// @param[in] entity An Entity reference to an Entity whose raw data
   /// should be returned.
   ///
   /// @return Returns a RawDataUniquePtr to the raw data.
-  virtual RawDataUniquePtr ExportRawData(const EntityRef& entity) const = 0;
+  virtual RawDataUniquePtr ExportRawData(const Entity entity) const = 0;
 
   /// @brief Called just before removal from the EntityManager. (i.e.
   /// Usually when the game/state is over and everything is shutting
@@ -185,9 +167,9 @@ public:
   /// Components should implement this if they need to perform any cleanup
   /// on the Entity data.
   ///
-  /// @param[in] entity An EntityRef reference to the Entity that is being
+  /// @param[in] entity An Entity reference to the Entity that is being
   /// removed and may need to be cleaned up.
-  virtual void CleanupEntity(EntityRef& entity) = 0;
+  virtual void CleanupEntity(Entity entity) = 0;
 
   /// @brief Set the EntityManager for this System. Usually this
   /// is assigned by the EntityManager itself.

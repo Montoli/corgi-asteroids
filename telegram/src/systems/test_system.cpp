@@ -13,7 +13,7 @@ void TestSystem::UpdateAllEntities(corgi::WorldTime delta_time) {
   
   /*
   for (auto itr = begin(); itr != end(); ++itr) {
-    corgi::EntityRef entity = itr->entity;
+    corgi::Entity entity = itr->entity;
     TestData2* testdata = Data<TestData2>(entity);
   }
   */
@@ -23,7 +23,7 @@ void TestSystem::UpdateAllEntities(corgi::WorldTime delta_time) {
 }
 
 
-void TestSystem::InitEntity(corgi::EntityRef& entity) {
+void TestSystem::InitEntity(corgi::Entity entity) {
   printf("entity from system 1 initted!");
 	SetIsThreadSafe(true);
 

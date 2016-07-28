@@ -15,7 +15,7 @@ public:
 
   virtual void DeclareDependencies();
 
-  virtual void InitEntity(corgi::EntityRef& entity);
+  virtual void InitEntity(corgi::Entity entity);
 
 };
 

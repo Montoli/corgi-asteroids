@@ -14,7 +14,7 @@ void PhysicsSystem::DeclareDependencies() {
 
 void PhysicsSystem::UpdateAllEntities(corgi::WorldTime delta_time) {
 	for (auto itr = begin(); itr != end(); ++itr) {
-		corgi::EntityRef entity = itr->entity;
+		corgi::Entity entity = itr->entity;
 		TransformData* transform_data = Data<TransformData>(entity);
 		PhysicsData* physics_data = Data<PhysicsData>(entity);
 		transform_data->position += vec3(physics_data->velocity.x(),

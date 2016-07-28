@@ -20,10 +20,11 @@
 #include <map>
 #include "corgi/system_id_lookup.h"
 #include "corgi/system_interface.h"
-#include "corgi/entity.h"
+//#include "corgi/entity.h"
 #include "corgi/entity_common.h"
-#include "corgi/vector_pool.h"
+//#include "corgi/vector_pool.h"
 #include "corgi/version.h"
+#include <cassert>
 
 namespace corgi {
 
@@ -31,21 +32,21 @@ namespace corgi {
 /// @addtogroup corgi_entity_manager
 /// @{
 ///
-/// @typedef EntityRef
+/// @typedef Entity
 ///
 /// @brief This should be used as the primary way to reference an Entity.
 ///
-/// An EntityRef can be treated like a pointer to an Entity. In most cases,
+/// An Entity can be treated like a pointer to an Entity. In most cases,
 /// it functions interchangeably with a normal pointer, but it also contains
-/// extra functionality for determining if the EntityRef is invalid. For
-/// instance, if the Entity that the EntityRef points to is deallocated, the
-/// EntityRef will no longer be valid (even if new data exists in the same
+/// extra functionality for determining if the Entity is invalid. For
+/// instance, if the Entity that the Entity points to is deallocated, the
+/// Entity will no longer be valid (even if new data exists in the same
 /// memory location previously held by the deallocated Entity).
 ///
 /// EntityRefs are typically passed by reference or const reference. If an
-/// EntityRef is const, then you can only access the underlying Entity data
+/// Entity is const, then you can only access the underlying Entity data
 /// in a read-only manner.
-typedef VectorPool<Entity>::VectorPoolReference EntityRef;
+//typedef VectorPool<Entity>::VectorPoolReference Entity;
 
 class EntityFactoryInterface;
 class SystemInterface;
@@ -76,7 +77,7 @@ class EntityManager {
   /// @typedef EntityStorageContainer
   ///
   /// @brief This is used to track all Entities stored by the EntityManager.
-  typedef VectorPool<Entity> EntityStorageContainer;
+  typedef std::unordered_set<Entity> EntityStorageContainer;
 
   /// @brief Helper function for marshalling data from a System.
   ///
@@ -87,7 +88,7 @@ class EntityManager {
   /// @return Returns a pointer to the System data, or returns
   /// a nullptr if no such data exists.
   template <typename T>
-  T* GetComponentData(const EntityRef& entity) {
+  T* GetComponentData(const Entity entity) {
     return static_cast<T*>(
         GetSystemDataAsVoid(entity, SystemIdLookup<T>::system_id));
   }
@@ -101,7 +102,7 @@ class EntityManager {
   /// @return Returns a const pointer to the System data, or returns
   /// a nullptr if no such data exists.
   template <typename T>
-  const T* GetComponentData(const EntityRef& entity) const {
+  const T* GetComponentData(const Entity entity) const {
     return static_cast<const T*>(
         GetSystemDataAsVoid(entity, SystemIdLookup<T>::system_id));
   }
@@ -148,10 +149,10 @@ class EntityManager {
   /// @tparam T The data type of the System that should have the Entity
   /// added to it.
   ///
-  /// @param[in] entity An EntityRef that points to the Entity that is being
+  /// @param[in] entity An Entity that points to the Entity that is being
   /// added to the System.
   template <typename T>
-  void AddComponent(EntityRef entity) {
+  void AddComponent(const Entity entity) {
     SystemId id =
         static_cast<SystemId>(SystemIdLookup<T>::system_id);
     assert(id != kInvalidSystem);
@@ -206,8 +207,8 @@ class EntityManager {
 
   /// @brief Allocates a new Entity (that is registered with no Components).
   ///
-  /// @return Returns an EntityRef that points to the new Entity.
-  EntityRef AllocateNewEntity();
+  /// @return Returns an Entity that points to the new Entity.
+	Entity AllocateNewEntity();
 
   /// @brief Deletes an Entity by removing it from the EntityManager's list and
   /// clearing any System data associated with it.
@@ -215,9 +216,9 @@ class EntityManager {
   /// @note Deletion is deferred until the end of the frame. If you want to
   /// delete something instantly, use DeleteEntityImmediately.
   ///
-  /// @param[in] entity An EntityRef that points to the Entity that will be
+  /// @param[in] entity An Entity that points to the Entity that will be
   /// deleted at the end of the frame.
-  void DeleteEntity(EntityRef entity);
+  void DeleteEntity(Entity entity);
 
   /// @brief Instantly deletes an Entity.
   ///
@@ -225,9 +226,9 @@ class EntityManager {
   /// until the end of the update cycle) unless you have a very good reason
   /// for doing so.
   ///
-  /// @param[in] entity An EntityRef that points to the Entity that will be
+  /// @param[in] entity An Entity that points to the Entity that will be
   /// immediately deleted.
-  void DeleteEntityImmediately(EntityRef entity);
+  void DeleteEntityImmediately(Entity entity);
 
   /// @brief Registers a new System with the EntityManager.
   ///
@@ -261,9 +262,9 @@ class EntityManager {
   ///
   /// @note Normally called by EntityManager prior to deleting an Entity.
   ///
-  /// @param[in] entity An EntityRef that points to the Entity whose Components
+  /// @param[in] entity An Entity that points to the Entity whose Components
   /// should be removed.
-  void RemoveAllSystems(EntityRef entity);
+  void RemoveAllSystems(Entity entity);
 
   /// @brief Iterates through all the registered Components and causes them to
   /// update.
@@ -281,12 +282,12 @@ class EntityManager {
   /// This is suitable for iterating over every active Entity.
   ///
   /// @return Returns a std::iterator to the first active Entity.
-  EntityStorageContainer::Iterator begin() { return entities_.begin(); }
+  EntityStorageContainer::iterator begin() { return entities_.begin(); }
 
   /// @brief Returns an iterator to the last of the active Entities.
   ///
   /// @return Returns a std::iterator to the last active Entity.
-  EntityStorageContainer::Iterator end() { return entities_.end(); }
+  EntityStorageContainer::iterator end() { return entities_.end(); }
 
   /// @brief Registers an instance of the EntityFactoryInterface as the
   /// factory object to be used when Entities are created from arbitrary
@@ -312,18 +313,18 @@ class EntityManager {
   /// @param[in] data A void pointer to the data to be used to create the
   /// Entity.
   ///
-  /// @return Returns an EntityRef that points to the newly created Entity.
-  EntityRef CreateEntityFromData(const void* data);
+  /// @return Returns an Entity that points to the newly created Entity.
+  Entity CreateEntityFromData(const void* data);
 
   /// @brief Registers an Entity with a System. This causes the System
   /// to allocate data for the Entity and includes the Entity in that
   /// System's update routines.
   ///
-  /// @param[in] entity An EntityRef that points to the Entity that should be
+  /// @param[in] entity An Entity that points to the Entity that should be
   /// registered with the System.
   /// @param[in] system_id The component ID of the System that should
   /// be registered with the Entity.
-  void AddComponent(EntityRef entity, SystemId system_id);
+  void AddComponent(Entity entity, SystemId system_id);
 
   /// @brief Deletes all the Entities that are marked for deletion.
   ///
@@ -337,7 +338,7 @@ class EntityManager {
 
 	/// @brief Sets the max number of worker threads.  Must be called
 	/// before FinalizeSystemLists or else it is ignored.
-	int set_max_worker_threads(int max_worker_threads) {
+	void set_max_worker_threads(int max_worker_threads) {
 		max_worker_threads_ = max_worker_threads;
 	}
 
@@ -371,7 +372,7 @@ class EntityManager {
   /// is returned as a void pointer. Typically a System is registered with a
   /// struct (or class) of System data, however this function returns the
   /// data as a void pointer, rather than a specific System data type.
-  void* GetSystemDataAsVoid(EntityRef entity, SystemId system_id);
+  void* GetSystemDataAsVoid(Entity entity, SystemId system_id);
 
   /// @brief Given a component ID and an Entity, returns all data associated
   /// with that Entity from the given System.
@@ -389,7 +390,7 @@ class EntityManager {
   /// is returned as a void pointer. Typically a System is registered with a
   /// struct (or class) of System data, however this function returns the
   /// data as a void pointer, rather than a specific System data type.
-  const void* GetSystemDataAsVoid(EntityRef entity,
+  const void* GetSystemDataAsVoid(Entity entity,
                                      SystemId system_id) const;
 
   /// @brief Searches through unupdated systems until it finds one that
@@ -420,7 +421,7 @@ class EntityManager {
   ///
   /// @brief Storage for all the Entities currently tracked by the
   /// EntityManager.
-  EntityStorageContainer entities_;
+	EntityStorageContainer entities_;
 
   /// @var systems_
   ///
@@ -451,7 +452,7 @@ class EntityManager {
   /// @note These entities are deleted by a call to DeleteMarkedEntities().
   /// DeleteMarkedEntities should NOT be called called during any form of
   /// Entity update.
-  std::vector<EntityRef> entities_to_delete_;
+	EntityStorageContainer entities_to_delete_;
 
   /// @var entity_factory_
   ///
@@ -466,6 +467,8 @@ class EntityManager {
   /// (via FinalizeSystemList)  Once FinalizeSystemList has been called, entities are
   /// no longer allowed to change their dependencies.
   bool is_system_list_final_;
+
+	EntityIdType next_entity_id_;
 
   // Current version of the Corgi Entity Library.
   const CorgiVersion* version_;
@@ -488,9 +491,9 @@ class EntityFactoryInterface {
   /// @param[in] entity_manager A pointer to an EntityManager that
   /// should create the Entity.
   ///
-  /// @return Returns an EntityRef pointing to the newly created
+  /// @return Returns an Entity pointing to the newly created
   /// Entity.
-  virtual EntityRef CreateEntityFromData(const void* data,
+  virtual Entity CreateEntityFromData(const void* data,
                                          EntityManager* entity_manager) = 0;
 };
 /// @}

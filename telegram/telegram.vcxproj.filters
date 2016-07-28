@@ -68,9 +68,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\external\corgi\include\corgi\entity.h">
-      <Filter>corgi</Filter>
-    </ClInclude>
     <ClInclude Include="..\external\corgi\include\corgi\entity_common.h">
       <Filter>corgi</Filter>
     </ClInclude>

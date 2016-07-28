@@ -11,7 +11,7 @@ CORGI_DEFINE_SYSTEM(FountainProjectile, FountainData)
 void FountainProjectile::UpdateAllEntities(corgi::WorldTime delta_time) {
 	//printf("entity updated!");
   for (auto itr = begin(); itr != end(); ++itr) {
-    corgi::EntityRef entity = itr->entity;
+    corgi::Entity entity = itr->entity;
 
 		TransformData* transform = Data<TransformData>(entity);
 		SpriteData* sprite = Data<SpriteData>(entity);
@@ -34,7 +34,7 @@ void FountainProjectile::DeclareDependencies() {
 }
 
 
-void FountainProjectile::InitEntity(corgi::EntityRef& entity) {
+void FountainProjectile::InitEntity(corgi::Entity entity) {
 	TransformData* transform = Data<TransformData>(entity);
 	SpriteData* sprite = Data<SpriteData>(entity);
 	PhysicsData* physics = Data<PhysicsData>(entity);

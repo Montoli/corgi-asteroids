@@ -30,7 +30,8 @@ EntityManager::EntityManager()
 			bookkeeping_mutex_(SDL_CreateMutex()),
 			worker_thread_mutex_(SDL_CreateMutex()),
 			worker_thread_cond_(SDL_CreateCond()),
-			max_worker_threads_(DEFAULT_MAX_THREADS - 1) {}
+			max_worker_threads_(DEFAULT_MAX_THREADS - 1),
+			next_entity_id_(1) {}
 
 EntityManager::~EntityManager() {
 	SDL_DestroyMutex(bookkeeping_mutex_);
@@ -39,43 +40,42 @@ EntityManager::~EntityManager() {
 }
 
 // Allocates a new entity and returns it
-EntityRef EntityManager::AllocateNewEntity() {
-  EntityRef result = EntityRef(entities_.GetNewElement(kAddToBack));
-  // Indexes are guaranteed to be unique and stable in vector pools.
-  // May need to revisit this if we implement defragging though.
-  result->set_entity_id(static_cast<EntityIdType>(result.index()));
-  return result;
+Entity EntityManager::AllocateNewEntity() {
+	Entity result = next_entity_id_++;
+	// Fix for the (basically nonexistant) problem of our ID rolling over.
+	if (next_entity_id_ == kInvalidEntityId) next_entity_id_ = 0;
+	entities_.insert(result);
+	return result;
 }
 
 // Note: This function doesn't actually delete the entity immediately -
 // it just marks it for deletion, and it gets cleaned out at the end of the
 // next AdvanceFrame.
-void EntityManager::DeleteEntity(EntityRef entity) {
-  if (entity->marked_for_deletion()) {
+void EntityManager::DeleteEntity(Entity entity) {
+	if (entities_to_delete_.find(entity) != entities_to_delete_.end()) {
     // already marked for deletion.
     return;
   }
-  entity->set_marked_for_deletion(true);
-  entities_to_delete_.push_back(entity);
+  entities_to_delete_.insert(entity);
 }
 
 // This deletes the entity instantly.  You should generally use the regular
 // DeleteEntity unless you have a particuarly good reason to need it instantly.
-void EntityManager::DeleteEntityImmediately(EntityRef entity) {
+void EntityManager::DeleteEntityImmediately(Entity entity) {
   RemoveAllSystems(entity);
-  entities_.FreeElement(entity);
+	entities_.erase(entity);
 }
 
 void EntityManager::DeleteMarkedEntities() {
-  for (size_t i = 0; i < entities_to_delete_.size(); i++) {
-    EntityRef entity = entities_to_delete_[i];
-    RemoveAllSystems(entity);
-    entities_.FreeElement(entity);
+  //for (size_t i = 0; i < entities_to_delete_.size(); i++) {
+	for (auto itr = entities_to_delete_.begin(); itr != entities_to_delete_.end(); ++itr) {
+    RemoveAllSystems(*itr);
+		entities_.erase(*itr);
   }
-  entities_to_delete_.resize(0);
+	entities_to_delete_.clear();
 }
 
-void EntityManager::RemoveAllSystems(EntityRef entity) {
+void EntityManager::RemoveAllSystems(Entity entity) {
   for (SystemId i = 0; i < systems_.size(); i++) {
     if (systems_[i] != nullptr && systems_[i]->HasDataForEntity(entity)) {
       systems_[i]->RemoveEntity(entity);
@@ -83,7 +83,7 @@ void EntityManager::RemoveAllSystems(EntityRef entity) {
   }
 }
 
-void EntityManager::AddComponent(EntityRef entity,
+void EntityManager::AddComponent(Entity entity,
                                          SystemId system_id) {
   SystemInterface* system = GetSystem(system_id);
   assert(system != nullptr);
@@ -115,7 +115,7 @@ void EntityManager::FinalizeSystemList() {
 	}
 }
 
-void* EntityManager::GetSystemDataAsVoid(EntityRef entity,
+void* EntityManager::GetSystemDataAsVoid(Entity entity,
                                             SystemId system_id) {
   return systems_[system_id]
              ? systems_[system_id]->GetSystemDataAsVoid(entity)
@@ -123,7 +123,7 @@ void* EntityManager::GetSystemDataAsVoid(EntityRef entity,
 }
 
 const void* EntityManager::GetSystemDataAsVoid(
-    EntityRef entity, SystemId system_id) const {
+    Entity entity, SystemId system_id) const {
   return systems_[system_id]
              ? systems_[system_id]->GetSystemDataAsVoid(entity)
              : nullptr;
@@ -158,7 +158,7 @@ void EntityManager::UpdateSystems(WorldTime delta_time) {
 		// to make sure no one broadcasts after we commit
 		// to CondWaiting, but before we actually CondWait...
 		SDL_LockMutex(worker_thread_mutex_);
-		if (system_id == kInvalidEntityId && !IsSystemUpdateComplete()) {
+		if (system_id == kInvalidSystem && !IsSystemUpdateComplete()) {
 			SDL_CondWait(worker_thread_cond_,
 				worker_thread_mutex_);
 			SDL_UnlockMutex(worker_thread_mutex_);
@@ -391,7 +391,7 @@ int EntityManager::EntityManagerWorkerThread(void * data) {
 	EntityManager* entity_manager = static_cast<EntityManager*>(data);
 	while (!entity_manager->exit_worker_threads_) {
 		SystemId system_id = entity_manager->ClaimSystemToUpdate(false);
-		if (system_id == kInvalidEntityId) {
+		if (system_id == kInvalidSystem) {
 			SDL_LockMutex(entity_manager->worker_thread_mutex_);
 			SDL_CondWait(entity_manager->worker_thread_cond_,
 				  entity_manager->worker_thread_mutex_);
@@ -417,10 +417,11 @@ void EntityManager::Clear() {
     }
   }
   systems_.clear();
-  entities_.Clear();
+	entities_.clear();
+	entities_to_delete_.clear();
 }
 
-EntityRef EntityManager::CreateEntityFromData(const void* data) {
+Entity EntityManager::CreateEntityFromData(const void* data) {
   assert(entity_factory_ != nullptr);
   return entity_factory_->CreateEntityFromData(data, this);
 }

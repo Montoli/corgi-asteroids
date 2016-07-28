@@ -158,7 +158,6 @@ xcopy /y /d  "$(ProjectDir)rsc\*" "$(OutDir)rsc"</Command>
     <ClInclude Include="..\external\corgi\include\corgi\system.h" />
     <ClInclude Include="..\external\corgi\include\corgi\system_id_lookup.h" />
     <ClInclude Include="..\external\corgi\include\corgi\system_interface.h" />
-    <ClInclude Include="..\external\corgi\include\corgi\entity.h" />
     <ClInclude Include="..\external\corgi\include\corgi\entity_common.h" />
     <ClInclude Include="..\external\corgi\include\corgi\entity_manager.h" />
     <ClInclude Include="..\external\corgi\include\corgi\vector_pool.h" />

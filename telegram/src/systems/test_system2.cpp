@@ -9,7 +9,7 @@ void TestSystem2::UpdateAllEntities(corgi::WorldTime delta_time) {
 	//printf("Test System 2 - starting update!\n");
 	//printf("entity updated!");
   for (auto itr = begin(); itr != end(); ++itr) {
-    corgi::EntityRef entity = itr->entity;
+    corgi::Entity entity = itr->entity;
     TestData* testdata = Data<TestData>(entity);
   }
 
