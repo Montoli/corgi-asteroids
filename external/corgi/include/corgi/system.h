@@ -266,12 +266,6 @@ class System : public SystemInterface {
     return const_cast<System*>(this)->GetComponentData(entity);
   }
 
-
-
-
-
-
-
   /// @brief Clears all tracked System data.
   void virtual ClearComponentData() {
 		while (component_index_lookup_.size() > 0) {

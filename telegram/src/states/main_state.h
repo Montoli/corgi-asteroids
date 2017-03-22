@@ -2,14 +2,13 @@
 #define MAINSTATE_H
 #include <memory>
 #include "corgi/entity_manager.h"
-#include "systems/test_system.h"
-#include "systems/test_system2.h"
 
+#include "systems/asteroid.h"
 #include "systems/transform.h"
 #include "systems/sprite.h"
 #include "systems/common.h"
 #include "systems/physics.h"
-#include "systems/fountain_projectile.h"
+#include "systems/wallbounce.h"
 
 #include "base_state.h"
 
@@ -30,17 +29,13 @@ public:
 
 private:
   corgi::EntityManager entity_manager_;
-  TestSystem test_system_;
-  TestSystem2 test_system2_;
 
-	CommonSystem common_system_;
+  AsteroidSystem asteroid_system_;
+  CommonSystem common_system_;
 	SpriteSystem sprite_system_;
 	TransformSystem transform_system_;
-	PhysicsSystem physics_system_;
-	FountainProjectile fountain_projectiles_;
-
-
-
+  PhysicsSystem physics_system_;
+  WallBounceSystem wallbounce_system_;
 
 };
 

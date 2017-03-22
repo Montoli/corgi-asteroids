@@ -14,8 +14,6 @@ struct PhysicsData {
 	vec2 acceleration;
 	quat angular_velocity;
 	quat angular_acceleration;
-
-
 };
 
 

@@ -18,20 +18,16 @@ MainState::MainState(SDL_Window* window, SDL_Surface* screen_surface,
 void MainState::Init() {
   printf("hello world!\n");
   corgi::Entity entity = entity_manager_.AllocateNewEntity();
+  entity_manager_.RegisterSystem(&asteroid_system_);
 	entity_manager_.RegisterSystem(&common_system_);
-	entity_manager_.RegisterSystem(&test_system_);
-  entity_manager_.RegisterSystem(&test_system2_);
 	entity_manager_.RegisterSystem(&transform_system_);
 	entity_manager_.RegisterSystem(&sprite_system_);
-	entity_manager_.RegisterSystem(&physics_system_);
-	entity_manager_.RegisterSystem(&fountain_projectiles_);
+  entity_manager_.RegisterSystem(&physics_system_);
+  entity_manager_.RegisterSystem(&wallbounce_system_);
 
 	entity_manager_.set_max_worker_threads(0);
 
   entity_manager_.FinalizeSystemList();
-
-  test_system2_.AddEntity(entity);
-  //entity_manager_.AddComponent(entity);
 
 	corgi::Entity spritetest;
 	SpriteData* sprite_data;
@@ -80,11 +76,12 @@ void MainState::Update(double delta_time) {
   SDL_Event event;
 
 	//if (rnd() < 0.2) {
+  /*
 	{
 		corgi::Entity particle_thing = entity_manager_.AllocateNewEntity();
 		entity_manager_.AddComponent<FountainProjectile>(particle_thing);
 		
-	}
+	}*/
 		
 
 

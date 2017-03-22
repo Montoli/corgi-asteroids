@@ -42,12 +42,6 @@
     <ClCompile Include="src\states\main_state.cpp">
       <Filter>Source Files\states</Filter>
     </ClCompile>
-    <ClCompile Include="src\systems\test_system.cpp">
-      <Filter>Source Files\systems</Filter>
-    </ClCompile>
-    <ClCompile Include="src\systems\test_system2.cpp">
-      <Filter>Source Files\systems</Filter>
-    </ClCompile>
     <ClCompile Include="src\systems\transform.cpp">
       <Filter>Source Files\systems</Filter>
     </ClCompile>
@@ -65,6 +59,12 @@
     </ClCompile>
     <ClCompile Include="src\math_common.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\systems\astroid.cpp">
+      <Filter>Source Files\systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\systems\wallbounce.cpp">
+      <Filter>Source Files\systems</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -89,9 +89,6 @@
     <ClInclude Include="src\states\main_state.h">
       <Filter>Source Files\states</Filter>
     </ClInclude>
-    <ClInclude Include="src\systems\test_system.h">
-      <Filter>Source Files\systems</Filter>
-    </ClInclude>
     <ClInclude Include="..\external\corgi\include\corgi\system.h">
       <Filter>corgi</Filter>
     </ClInclude>
@@ -100,9 +97,6 @@
     </ClInclude>
     <ClInclude Include="..\external\corgi\include\corgi\system_interface.h">
       <Filter>corgi</Filter>
-    </ClInclude>
-    <ClInclude Include="src\systems\test_system2.h">
-      <Filter>Source Files\systems</Filter>
     </ClInclude>
     <ClInclude Include="..\external\corgi\include\corgi\network_system.h">
       <Filter>corgi</Filter>
@@ -132,6 +126,12 @@
       <Filter>Source Files\systems</Filter>
     </ClInclude>
     <ClInclude Include="src\systems\physics.h">
+      <Filter>Source Files\systems</Filter>
+    </ClInclude>
+    <ClInclude Include="src\systems\asteroid.h">
+      <Filter>Source Files\systems</Filter>
+    </ClInclude>
+    <ClInclude Include="src\systems\wallbounce.h">
       <Filter>Source Files\systems</Filter>
     </ClInclude>
   </ItemGroup>
