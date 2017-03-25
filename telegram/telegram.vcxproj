@@ -152,6 +152,7 @@ xcopy /y /d  "$(ProjectDir)rsc\*" "$(OutDir)rsc"</Command>
     <ClCompile Include="src\systems\sprite.cpp" />
     <ClCompile Include="src\systems\transform.cpp" />
     <ClCompile Include="src\systems\wallbounce.cpp" />
+    <ClCompile Include="src\texture_manager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\external\corgi\include\corgi\network_system.h" />
@@ -176,6 +177,7 @@ xcopy /y /d  "$(ProjectDir)rsc\*" "$(OutDir)rsc"</Command>
     <ClInclude Include="src\systems\sprite.h" />
     <ClInclude Include="src\systems\transform.h" />
     <ClInclude Include="src\systems\wallbounce.h" />
+    <ClInclude Include="src\texture_manager.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\external\corgi\changelog.txt" />

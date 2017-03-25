@@ -9,29 +9,46 @@
 
 CORGI_DEFINE_SYSTEM(SpriteSystem, SpriteData)
 
-void SpriteSystem::AddPointToBuffer(vec4 p, vec2 uv, vec4 tint) {
-	vertex_buffer_[buffer_length_++] = p.x();
-	vertex_buffer_[buffer_length_++] = p.y();
-	vertex_buffer_[buffer_length_++] = p.z();
-	vertex_buffer_[buffer_length_++] = 0.0f;	// u
-	vertex_buffer_[buffer_length_++] = 0.0f;	// v
-	vertex_buffer_[buffer_length_++] = tint.x();	// r
-	vertex_buffer_[buffer_length_++] = tint.y();	// g
-	vertex_buffer_[buffer_length_++] = tint.z();	// b
-	vertex_buffer_[buffer_length_++] = tint.w();	// a
-	assert(buffer_length_ < kTotalBufferSize);
-	buffer_count_++;
+void SpriteSystem::AddPointToBuffer(BufferInfo& buffer, vec4 p, vec2 uv, vec4 tint) {
+	vertex_buffer_[buffer.start_index + buffer.length++] = p.x();
+	vertex_buffer_[buffer.start_index + buffer.length++] = p.y();
+	vertex_buffer_[buffer.start_index + buffer.length++] = p.z();
+	vertex_buffer_[buffer.start_index + buffer.length++] = uv.x();	// u
+	vertex_buffer_[buffer.start_index + buffer.length++] = uv.y();	// v
+	vertex_buffer_[buffer.start_index + buffer.length++] = tint.x();	// r
+	vertex_buffer_[buffer.start_index + buffer.length++] = tint.y();	// g
+	vertex_buffer_[buffer.start_index + buffer.length++] = tint.z();	// b
+	vertex_buffer_[buffer.start_index + buffer.length++] = tint.w();	// a
+  buffer.count++;
 }
 
 void SpriteSystem::UpdateAllEntities(corgi::WorldTime delta_time) {
-	// build our vertex buffer:
-	buffer_length_ = 0;
-	buffer_count_ = 0;
+  // First pass:  Just count how many sprites there are of each
+  // texture so we know how to map out vertex memory:
+  tex_count.clear();
+  for (auto itr = begin(); itr != end(); ++itr) {
+    if (tex_count.find(itr->data.texture) == tex_count.end()) {
+      tex_count[itr->data.texture] = 1;
+    } else {
+      tex_count[itr->data.texture]++;
+    }
+  }
+
+  // Now figure out offsets into our buffer, for where each texture
+  // batch of sprites should live.
+  buffer.clear();
+  int index = 0;
+  for (auto itr = tex_count.begin(); itr != tex_count.end(); ++itr) {
+    buffer[itr->first] = BufferInfo(index);
+    index += itr->second * kFloatsPerPoint * kPointsPerSprite;
+  }
+
 	//printf("updating %d sprites!\n", component_data_.size());
 	for (auto itr = begin(); itr != end(); ++itr) {
 		corgi::Entity entity = itr->entity;
 		TransformData* transform_data = Data<TransformData>(entity);
 		SpriteData* sprite_data = Data<SpriteData>(entity);
+    BufferInfo b_info = buffer[sprite_data->texture];
 		
 		float width = sprite_data->size.x();
 		float height = sprite_data->size.y();
@@ -49,16 +66,16 @@ void SpriteSystem::UpdateAllEntities(corgi::WorldTime delta_time) {
 		p3 = transform_matrix * p3;
 		p4 = transform_matrix * p4;
 
-		// todo - convert this to an index buffer, save some space
-		AddPointToBuffer(p1, vec2(0, 0), sprite_data->tint);
-		AddPointToBuffer(p2, vec2(0, 0), sprite_data->tint);
-		AddPointToBuffer(p3, vec2(0, 0), sprite_data->tint);
+		AddPointToBuffer(b_info, p1, vec2(0, 0), sprite_data->tint);
+		AddPointToBuffer(b_info, p2, vec2(1, 0), sprite_data->tint);
+		AddPointToBuffer(b_info, p3, vec2(0, 1), sprite_data->tint);
 
-		AddPointToBuffer(p2, vec2(0, 0), sprite_data->tint);
-		AddPointToBuffer(p3, vec2(0, 0), sprite_data->tint);
-		AddPointToBuffer(p4, vec2(0, 0), sprite_data->tint);
+		AddPointToBuffer(b_info, p2, vec2(1, 0), sprite_data->tint);
+		AddPointToBuffer(b_info, p3, vec2(0, 1), sprite_data->tint);
+		AddPointToBuffer(b_info, p4, vec2(1, 1), sprite_data->tint);
 
-		if (buffer_length_ >= kTotalBufferSize - 10) break;
+    // shove it back into the map now that we've updated it.
+    buffer[sprite_data->texture] = b_info;
 	}
 }
 
@@ -68,17 +85,22 @@ const char vShaderStr[] =
 "attribute vec2 a_tex_uv;          \n"
 "attribute vec4 a_tint;            \n"
 "varying vec4 v_tint;              \n"
+"varying vec2 v_tex_uv;            \n"
 "void main() {                     \n"
 "  v_tint = a_tint;                \n"
+"  v_tex_uv = a_tex_uv;            \n"
 "  gl_Position = u_mvp * a_vertex;   \n"
 "}                                 \n";
 
 const char fShaderStr[] =
+"uniform sampler2D tex; //this is the texture                   \n"
 "varying vec4 v_tint;                         \n"
-"void main() {                                \n"
-"  gl_FragColor = vec4(v_tint.xyz, 1);        \n"
-"  //gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); \n"
-"}                                            \n";
+"varying vec2 v_tex_uv; //this is the texture coord              \n"
+"void main() {                                                  \n"
+"  vec4 color = texture2D(tex, v_tex_uv);                     \n"
+"  if (color.a == 0.0) discard;  \n"
+"  gl_FragColor = color * vec4(v_tint.xyz, 1); \n"
+"}";
 
 void SpriteSystem::DeclareDependencies() {
   DependOn<TransformSystem>(corgi::kExecuteAfter, corgi::kReadAccess);
@@ -98,19 +120,9 @@ void SpriteSystem::InitEntity(corgi::Entity entity) {
 }
 
 void SpriteSystem::RenderSprites() {
-	//	SDL_BlitSurface(hello_world, NULL, screen_surface, NULL);
-
-		//glClearColor(0, 0, 0, 1);
-		//glClear(GL_COLOR_BUFFER_BIT);
-		//SDL_GL_SwapWindow(window);
-
-		//UserData *userData = esContext->userData;
-
 	CommonComponent* common = entity_manager_->GetSystem<CommonSystem>()->CommonData();
 	mat4 vp_matrix = mat4::Ortho(0.0f, 640.0f, 480.0f, 0.0f, -1.0f, 1.0f, 1.0f);
 
-
-	
 	GLfloat vVertices[] = { 
 		0.0f,  0.0f, 0.0f,    0.0f, 0.0f,  1.0f, 1.0f, 1.0f, 1.0f,
 		100.0f, 100.0f, 0.0f,   0.0f, 0.0f,  1.0f, 1.0f, 0.0f, 1.0f,
@@ -131,43 +143,24 @@ void SpriteSystem::RenderSprites() {
 		glUniformMatrix4fv(loc, 1, false, &vp_matrix[0]);
 	}
 
-	int stride = sizeof(GLfloat) * 9;
+	int stride = sizeof(GLfloat) * kFloatsPerPoint;
 
 	glVertexAttribPointer(kVertexLoc, 3, GL_FLOAT, GL_FALSE, stride, vertex_buffer_ + 0);
 	glVertexAttribPointer(kTextureUVLoc, 2, GL_FLOAT, GL_FALSE, stride, vertex_buffer_ + 3);
 	glVertexAttribPointer(kTintLoc, 4, GL_FLOAT, GL_FALSE, stride, vertex_buffer_ + 5);
 
-
 	glEnableVertexAttribArray(kVertexLoc);
 	glEnableVertexAttribArray(kTextureUVLoc);
 	glEnableVertexAttribArray(kTintLoc);
 
+  for (auto itr = buffer.begin(); itr != buffer.end(); ++itr) {
+    const char* texture_name = itr->first;
+    BufferInfo b_info = itr->second;
 
-	//glDrawArrays(GL_TRIANGLES, 0, 3);
-	glDrawArrays(GL_TRIANGLES, 0, buffer_count_);
-}
-
-SDL_Surface* SpriteSystem::LoadPNG(std::string path) {
-	//The final optimized image
-	SDL_Surface* optimizedSurface = NULL;
-	CommonComponent* common = entity_manager_->GetSystem<CommonSystem>()->CommonData();
-	/*
-	//Load image at specified path
-	SDL_Surface* loadedSurface = IMG_Load(path.c_str());
-	if (loadedSurface == NULL) {
-		printf("Unable to load image %s! SDL_image Error: %s\n", path.c_str(), IMG_GetError());
-	} else {
-		//Convert surface to screen format
-		optimizedSurface = SDL_ConvertSurface(loadedSurface, common->screen_surface->format, NULL);
-		if (optimizedSurface == NULL) {
-			printf("Unable to optimize image %s! SDL Error: %s\n", path.c_str(), SDL_GetError());
-		}
-
-		//Get rid of old loaded surface
-		SDL_FreeSurface(loadedSurface);
-	}
-	*/
-	return optimizedSurface;
+    GLuint texture = common->texture_manager.GetTexture(texture_name);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glDrawArrays(GL_TRIANGLES, b_info.start_index / kFloatsPerPoint, b_info.count);
+  }
 }
 
 
@@ -232,13 +225,10 @@ void SpriteSystem::Init() {
 	glAttachShader(programObject, vertexShader);
 	glAttachShader(programObject, fragmentShader);
 
-
-
 	// Bind vPosition to attribute 0
 	glBindAttribLocation(programObject, kVertexLoc, "a_vertex");
 	glBindAttribLocation(programObject, kTextureUVLoc, "a_tex_uv");
 	glBindAttribLocation(programObject, kTintLoc, "a_tint");
-	
 
 	// Link the program
 	glLinkProgram(programObject);

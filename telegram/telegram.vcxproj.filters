@@ -66,6 +66,9 @@
     <ClCompile Include="src\systems\wallbounce.cpp">
       <Filter>Source Files\systems</Filter>
     </ClCompile>
+    <ClCompile Include="src\texture_manager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\external\corgi\include\corgi\entity_common.h">
@@ -133,6 +136,9 @@
     </ClInclude>
     <ClInclude Include="src\systems\wallbounce.h">
       <Filter>Source Files\systems</Filter>
+    </ClInclude>
+    <ClInclude Include="src\texture_manager.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

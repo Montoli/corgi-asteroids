@@ -11,8 +11,27 @@ struct SpriteData {
 	vec2 uv;
 	vec2 size;
 	vec4 tint;
+  const char* texture = nullptr;
 };
 
+// Info about a vertex buffer.
+struct BufferInfo {
+  BufferInfo() :
+    start_index(0),
+    length(0),
+    count(0) {
+  }
+
+
+  BufferInfo(int startIndex) :
+    start_index(startIndex),
+    length(0),
+    count(0) {}
+
+  int start_index;
+  int length;
+  int count;
+};
 
 class SpriteSystem : public corgi::System<SpriteData> {
 public:
@@ -29,10 +48,9 @@ public:
 
 	void RenderSprites();
 
-	SDL_Surface * LoadPNG(std::string path);
 
 private:
-	void AddPointToBuffer(vec4 p, vec2 uv, vec4 tint);
+	void AddPointToBuffer(BufferInfo& buffer, vec4 p, vec2 uv, vec4 tint);
 
 	static const int kMaxSprites = 500;
 	static const int kPointsPerSprite = 6;
@@ -54,10 +72,13 @@ private:
 
 	GLfloat vertex_buffer_[kTotalBufferSize];
 	
-	int buffer_length_;
-	int buffer_count_;
+	//int buffer_length_;
+	//int buffer_count_;
 
+  std::map<const char*, int> tex_count;
+  std::map<const char*, BufferInfo> buffer;
 };
+
 
 CORGI_REGISTER_SYSTEM(SpriteSystem, SpriteData)
 

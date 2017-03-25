@@ -73,6 +73,10 @@ int main(int argc, char* args[])
 			glewInit();
 
 
+      // Set blend modes:
+      glEnable(GL_BLEND);
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
       StateManager state_manager;
 
       state_manager.PushState(new MainState(window, screen_surface, gl_context,

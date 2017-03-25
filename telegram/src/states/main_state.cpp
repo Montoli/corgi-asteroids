@@ -33,6 +33,7 @@ void MainState::Init() {
 	SpriteData* sprite_data;
 	TransformData* transform_data;
 
+  /*
 	spritetest = entity_manager_.AllocateNewEntity();
 	entity_manager_.AddComponent<SpriteSystem>(spritetest);
 	sprite_data = entity_manager_.GetComponentData<SpriteData>(spritetest);
@@ -53,6 +54,13 @@ void MainState::Init() {
 	sprite_data->size = vec2(40, 60);
 	transform_data->scale = vec2(1.0f, 1.0f);
 	transform_data->orientation = quat::FromAngleAxis(2.3f, vec3(0, 0, 1));
+  */
+
+  for (int i = 0; i < 15; i++) {
+    corgi::Entity new_asteroid = entity_manager_.AllocateNewEntity();
+    entity_manager_.AddComponent<AsteroidSystem>(new_asteroid);
+  }
+
 }
 
 
