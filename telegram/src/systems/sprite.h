@@ -8,6 +8,7 @@
 
 struct SpriteData {
 	//int texture; // make this something real!
+  SpriteData() : uv(0, 0), size(1, 1), tint(1, 1, 1, 1) {}
 	vec2 uv;
 	vec2 size;
 	vec4 tint;
@@ -37,17 +38,11 @@ class SpriteSystem : public corgi::System<SpriteData> {
 public:
 
 	virtual void Init();
-
 	virtual void UpdateAllEntities(corgi::WorldTime delta_time);
-
   virtual void DeclareDependencies();
-
 	virtual void Cleanup();
-
 	virtual void InitEntity(corgi::Entity entity);
-
 	void RenderSprites();
-
 
 private:
 	void AddPointToBuffer(BufferInfo& buffer, vec4 p, vec2 uv, vec4 tint);

@@ -186,12 +186,12 @@ class EntityManager {
     return systems_[id];
   }
 
-  /// @brief Returns the number of components that have been registered
+  /// @brief Returns the number of systems that have been registered
   /// with the entity manager.
   ///
-  /// @return The total number of components that are currently registered
+  /// @return The total number of systems that are currently registered
   /// with the entity manager.
-  inline size_t ComponentCount() const { return systems_.size(); }
+  inline size_t SystemCount() const { return systems_.size(); }
 
   /// @brief A helper function to get the component ID for a given System.
   ///
@@ -199,7 +199,7 @@ class EntityManager {
   ///
   /// @return Returns the component ID for a given System.
   template <typename T>
-  SystemId GetComponentId() {
+  SystemId GetSystemId() {
     return SystemIdLookup<T>::system_id;
   }
 

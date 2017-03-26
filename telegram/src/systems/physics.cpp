@@ -7,6 +7,7 @@ CORGI_DEFINE_SYSTEM(PhysicsSystem, PhysicsData)
 
 void PhysicsSystem::DeclareDependencies() {
 	DependOn<TransformSystem>(corgi::kExecuteBefore, corgi::kReadWriteAccess);
+  RequireComponent<TransformSystem>();
 	SetIsThreadSafe(true);
 }
 

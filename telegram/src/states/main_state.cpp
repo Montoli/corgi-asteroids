@@ -12,6 +12,8 @@ MainState::MainState(SDL_Window* window, SDL_Surface* screen_surface,
 	common_data->gl_context = context;
 	common_data->screen_size = vec2(static_cast<float>(screen_width),
 														static_cast<float>(screen_height));
+  common_data->texture_manager = &texture_manager_;
+  common_data->keyboard_input = &keyboard_input_;
 }
 
 
@@ -24,6 +26,8 @@ void MainState::Init() {
 	entity_manager_.RegisterSystem(&sprite_system_);
   entity_manager_.RegisterSystem(&physics_system_);
   entity_manager_.RegisterSystem(&wallbounce_system_);
+  entity_manager_.RegisterSystem(&player_ship_system_);
+  entity_manager_.RegisterSystem(&fade_timer_system_);
 
 	entity_manager_.set_max_worker_threads(0);
 
@@ -56,6 +60,11 @@ void MainState::Init() {
 	transform_data->orientation = quat::FromAngleAxis(2.3f, vec3(0, 0, 1));
   */
 
+  corgi::Entity player_ship = entity_manager_.AllocateNewEntity();
+  entity_manager_.AddComponent<PlayerShip>(player_ship);
+
+
+
   for (int i = 0; i < 15; i++) {
     corgi::Entity new_asteroid = entity_manager_.AllocateNewEntity();
     entity_manager_.AddComponent<AsteroidSystem>(new_asteroid);
@@ -74,40 +83,42 @@ void MainState::Render(double delta_time) {
 }
 
 
-void MainState::Update(double delta_time) {
-	//printf("---------------------------------------------\n");
-	//printf("start of update!\n");
-	//printf("---------------------------------------------\n");
-
-  entity_manager_.UpdateSystems(delta_time);
-
+void MainState::UpdateInput() {
+  keyboard_input_.ClearForUpdate();
   SDL_Event event;
-
-	//if (rnd() < 0.2) {
-  /*
-	{
-		corgi::Entity particle_thing = entity_manager_.AllocateNewEntity();
-		entity_manager_.AddComponent<FountainProjectile>(particle_thing);
-		
-	}*/
-		
-
-
-
   while (SDL_PollEvent(&event)) {
     // We are only worried about SDL_KEYDOWN and SDL_KEYUP events
     switch (event.type) {
+    case SDL_QUIT:
+      printf("Exit signal detected\n");
+      EndState();
+      break;
+
     case SDL_KEYDOWN:
-      printf("Key press detected\n");
+      keyboard_input_.SetKeyState(event.key.keysym.sym, true);
       break;
 
     case SDL_KEYUP:
-      printf("Key release detected\n");
-      EndState();
+      keyboard_input_.SetKeyState(event.key.keysym.sym, false);
+      //EndState();
       break;
 
     default:
       break;
     }
   }
+}
+
+
+void MainState::Update(double delta_time) {
+	//printf("---------------------------------------------\n");
+	//printf("start of update!\n");
+	//printf("---------------------------------------------\n");
+
+  entity_manager_.UpdateSystems(delta_time);
+  UpdateInput();
+  if (keyboard_input_.GetKeyState(SDLK_ESCAPE).was_released) {
+    EndState();
+  }
+
 }

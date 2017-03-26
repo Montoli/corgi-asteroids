@@ -3,6 +3,7 @@
 #include "corgi/system.h"
 #include "math_common.h"
 #include "texture_manager.h"
+#include "keyboard_input.h"
 #include <SDL.h>
 
 struct CommonComponent {
@@ -10,7 +11,8 @@ struct CommonComponent {
 	SDL_Surface* screen_surface = nullptr;
 	SDL_GLContext gl_context = nullptr;
 	vec2 screen_size;
-  TextureManager texture_manager;
+  TextureManager* texture_manager;
+  KeyboardInput* keyboard_input;
 };
 
 class CommonSystem : public corgi::System<CommonComponent> {

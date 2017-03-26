@@ -4,9 +4,7 @@ and may not be redistributed without written permission.*/
 //Using SDL and standard IO
 #include <SDL.h>
 #include <stdio.h>
-
 #include "GL/glew.h"
-
 #include "states/state_manager.h"
 #include "states/main_state.h"
 

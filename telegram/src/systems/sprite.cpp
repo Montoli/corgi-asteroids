@@ -10,15 +10,17 @@
 CORGI_DEFINE_SYSTEM(SpriteSystem, SpriteData)
 
 void SpriteSystem::AddPointToBuffer(BufferInfo& buffer, vec4 p, vec2 uv, vec4 tint) {
-	vertex_buffer_[buffer.start_index + buffer.length++] = p.x();
-	vertex_buffer_[buffer.start_index + buffer.length++] = p.y();
-	vertex_buffer_[buffer.start_index + buffer.length++] = p.z();
-	vertex_buffer_[buffer.start_index + buffer.length++] = uv.x();	// u
-	vertex_buffer_[buffer.start_index + buffer.length++] = uv.y();	// v
-	vertex_buffer_[buffer.start_index + buffer.length++] = tint.x();	// r
-	vertex_buffer_[buffer.start_index + buffer.length++] = tint.y();	// g
-	vertex_buffer_[buffer.start_index + buffer.length++] = tint.z();	// b
-	vertex_buffer_[buffer.start_index + buffer.length++] = tint.w();	// a
+  int index = buffer.start_index + buffer.length;
+	vertex_buffer_[index++] = p.x();
+	vertex_buffer_[index++] = p.y();
+	vertex_buffer_[index++] = p.z();
+	vertex_buffer_[index++] = uv.x();	// u
+	vertex_buffer_[index++] = uv.y();	// v
+	vertex_buffer_[index++] = tint.x();	// r
+	vertex_buffer_[index++] = tint.y();	// g
+	vertex_buffer_[index++] = tint.z();	// b
+	vertex_buffer_[index++] = tint.w();	// a
+  buffer.length = index - buffer.start_index;
   buffer.count++;
 }
 
@@ -43,7 +45,6 @@ void SpriteSystem::UpdateAllEntities(corgi::WorldTime delta_time) {
     index += itr->second * kFloatsPerPoint * kPointsPerSprite;
   }
 
-	//printf("updating %d sprites!\n", component_data_.size());
 	for (auto itr = begin(); itr != end(); ++itr) {
 		corgi::Entity entity = itr->entity;
 		TransformData* transform_data = Data<TransformData>(entity);
@@ -99,12 +100,14 @@ const char fShaderStr[] =
 "void main() {                                                  \n"
 "  vec4 color = texture2D(tex, v_tex_uv);                     \n"
 "  if (color.a == 0.0) discard;  \n"
-"  gl_FragColor = color * vec4(v_tint.xyz, 1); \n"
+"  gl_FragColor = color * v_tint; \n"
 "}";
 
 void SpriteSystem::DeclareDependencies() {
   DependOn<TransformSystem>(corgi::kExecuteAfter, corgi::kReadAccess);
 	DependOn<CommonSystem>(corgi::kNoOrderDependency, corgi::kReadAccess);
+  RequireComponent<TransformSystem>();
+
 	SetIsThreadSafe(true);
 }
 
@@ -157,7 +160,7 @@ void SpriteSystem::RenderSprites() {
     const char* texture_name = itr->first;
     BufferInfo b_info = itr->second;
 
-    GLuint texture = common->texture_manager.GetTexture(texture_name);
+    GLuint texture = common->texture_manager->GetTexture(texture_name);
     glBindTexture(GL_TEXTURE_2D, texture);
     glDrawArrays(GL_TRIANGLES, b_info.start_index / kFloatsPerPoint, b_info.count);
   }

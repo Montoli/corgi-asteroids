@@ -30,7 +30,11 @@ void FountainProjectile::DeclareDependencies() {
 	DependOn<SpriteSystem>(corgi::kExecuteBefore, corgi::kReadWriteAccess);
 	DependOn<TransformSystem>(corgi::kExecuteBefore, corgi::kReadWriteAccess);
 	DependOn<PhysicsData>(corgi::kExecuteAfter, corgi::kReadWriteAccess);
-	SetIsThreadSafe(true);
+
+  RequireComponent<SpriteSystem>();
+  RequireComponent<TransformSystem>();
+  RequireComponent<PhysicsData>();
+  SetIsThreadSafe(true);
 }
 
 

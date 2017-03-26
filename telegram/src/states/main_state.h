@@ -9,8 +9,13 @@
 #include "systems/common.h"
 #include "systems/physics.h"
 #include "systems/wallbounce.h"
+#include "systems/playership.h"
+#include "systems/fade_timer.h"
 
 #include "base_state.h"
+#include "keyboard_input.h"
+#include "texture_manager.h"
+
 
 class MainState : public BaseState {
 public:
@@ -27,15 +32,23 @@ public:
   virtual void Suspend() {}
   virtual void Resume() {}
 
+  void UpdateInput();
+
 private:
+  KeyboardInput keyboard_input_;
+  TextureManager texture_manager_;
+
+
   corgi::EntityManager entity_manager_;
 
   AsteroidSystem asteroid_system_;
+  PlayerShip player_ship_system_;
   CommonSystem common_system_;
 	SpriteSystem sprite_system_;
 	TransformSystem transform_system_;
   PhysicsSystem physics_system_;
   WallBounceSystem wallbounce_system_;
+  FadeTimerSystem fade_timer_system_;
 
 };
 

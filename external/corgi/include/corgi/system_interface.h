@@ -125,11 +125,17 @@ public:
                         SystemOrderDependencyType order_dependency,
                         SystemAccessDependencyType access_dependency) = 0;
 
+  /// @brief Declare a component that is guaranteed to be on any entity
+  /// registered with this system.  (Will get auto-added on init.)
+  virtual void RequireComponent(SystemId system_id) = 0;
+
   // todo: write desc
   virtual const std::unordered_map<SystemId, SystemAccessDependencyType>*
 	  AccessDependencies() = 0;
   // todo: write desc
   virtual const std::unordered_set<SystemId>* ExecuteDependencies() = 0;
+  // todo: write desc
+  virtual const std::unordered_set<SystemId>* AutoAddSystems() = 0;
 
   /// @brief Called by the EntityManager every time an Entity is added to this
   /// System.
@@ -205,18 +211,6 @@ public:
   /// @param[in] is_thread_safe a boolean specifying the thread-safety
   /// of this system.  True means that it is thread-safe.
   virtual void SetIsThreadSafe(bool is_thread_safe) = 0;
-
-
-
-	//-------------------------------
-	// Network synchronization:
-	virtual void SetRewindBufferProperties(WorldTime buffer_timestep,
-		WorldTime buffer_history_length) = 0;
-	virtual void StartRewindBuffer() = 0;
-	virtual void RewindToTimestamp(WorldTime new_timestamp) = 0;
-	//-------------------------------
-
-
 };
 /// @}
 

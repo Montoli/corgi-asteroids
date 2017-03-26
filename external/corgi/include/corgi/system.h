@@ -369,6 +369,19 @@ class System : public SystemInterface {
   /// dependencies they have on other systems, if any. (Via System::DependOn)
   virtual void DeclareDependencies() {}
 
+  /// @brief Declare a component that is guaranteed to be on any entity
+  /// registered with this system.  (Will get auto-added on init.)
+  virtual void RequireComponent(SystemId system_id) {
+    autoadd_systems_.insert(system_id);
+  }
+
+  /// @brief Declare a component that is guaranteed to be on any entity
+  /// registered with this system.  (Will get auto-added on init.)
+  template <typename SystemType>
+  void RequireComponent() {
+    RequireComponent(SystemIdLookup<SystemType>::system_id);
+  }
+
   /// @brief A utility function for declaring a dependency on another system.
   ///
   /// @tparam ComponentDataType The data type of the System to depend on.
@@ -411,8 +424,8 @@ class System : public SystemInterface {
   }
 
   /// @brief A utility function for registering an entity with all systems that
-  /// this system depends on components from.  Will do nothing if it already has
-  /// some or all of these components.
+  /// this system requires components from.  Will skip any components that
+  /// have already been added.
   ///
   /// @tparam entity The entity to add components to.
   void AddSystemDependencies(Entity entity) {
@@ -420,9 +433,9 @@ class System : public SystemInterface {
     assert(entity_manager_);
     assert(entity_manager_->is_system_list_final());
 
-    for (auto itr = access_dependencies_.begin();
-        itr != access_dependencies_.end(); ++itr) {
-      SystemInterface* system = entity_manager_->GetSystem(itr->first);
+    for (auto itr = autoadd_systems_.begin();
+        itr != autoadd_systems_.end(); ++itr) {
+      SystemInterface* system = entity_manager_->GetSystem(*itr);
       assert(system);
       system->AddEntityGenerically(entity);
     }
@@ -503,16 +516,6 @@ class System : public SystemInterface {
     is_thread_safe_ = is_thread_safe;
   }
 
-	//-------------------------------
-	// Network synchronization.
-	virtual void SetRewindBufferProperties(WorldTime buffer_timestep,
-		WorldTime buffer_history_length) {}
-	virtual void StartRewindBuffer() {}
-	virtual void RewindToTimestamp(WorldTime new_timestamp) {}
-	//-------------------------------
-
-
-
 	  // todo: write desc
   virtual const std::unordered_map<SystemId, SystemAccessDependencyType>*
 	  AccessDependencies() {
@@ -524,6 +527,10 @@ class System : public SystemInterface {
 		return &execute_dependencies_;
   }
 
+  // todo: write desc
+  virtual const std::unordered_set<SystemId>* AutoAddSystems() {
+    return &autoadd_systems_;
+  }
 
  private:
   /// @brief Allows Components to handle any per-Entity clean up that may
@@ -539,6 +546,10 @@ class System : public SystemInterface {
   /// @brief : List of systems that we depend on having updated first,
   /// before this system updates.
   std::unordered_set<SystemId> execute_dependencies_;
+
+  /// @brief : List of systems that we automatically rope in when
+  /// adding an entity to this system.
+  std::unordered_set<SystemId> autoadd_systems_;
   
   /// @brief : Designates whether or not this system is thread-safe.
   bool is_thread_safe_;

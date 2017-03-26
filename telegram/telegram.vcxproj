@@ -141,21 +141,23 @@ xcopy /y /d  "$(ProjectDir)rsc\*" "$(OutDir)rsc"</Command>
   <ItemGroup>
     <ClCompile Include="..\external\corgi\src\entity_manager.cpp" />
     <ClCompile Include="..\external\corgi\src\version.cpp" />
+    <ClCompile Include="src\keyboard_input.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\math_common.cpp" />
     <ClCompile Include="src\states\main_state.cpp" />
     <ClCompile Include="src\states\state_manager.cpp" />
     <ClCompile Include="src\systems\astroid.cpp" />
     <ClCompile Include="src\systems\common.cpp" />
+    <ClCompile Include="src\systems\fade_timer.cpp" />
     <ClCompile Include="src\systems\fountain_projectile.cpp" />
     <ClCompile Include="src\systems\physics.cpp" />
+    <ClCompile Include="src\systems\playership.cpp" />
     <ClCompile Include="src\systems\sprite.cpp" />
     <ClCompile Include="src\systems\transform.cpp" />
     <ClCompile Include="src\systems\wallbounce.cpp" />
     <ClCompile Include="src\texture_manager.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\external\corgi\include\corgi\network_system.h" />
     <ClInclude Include="..\external\corgi\include\corgi\system.h" />
     <ClInclude Include="..\external\corgi\include\corgi\system_id_lookup.h" />
     <ClInclude Include="..\external\corgi\include\corgi\system_interface.h" />
@@ -166,14 +168,17 @@ xcopy /y /d  "$(ProjectDir)rsc\*" "$(OutDir)rsc"</Command>
     <ClInclude Include="..\external\glew-1.13.0\include\GL\glew.h" />
     <ClInclude Include="..\external\glew-1.13.0\include\GL\glxew.h" />
     <ClInclude Include="..\external\glew-1.13.0\include\GL\wglew.h" />
+    <ClInclude Include="src\keyboard_input.h" />
     <ClInclude Include="src\math_common.h" />
     <ClInclude Include="src\states\base_state.h" />
     <ClInclude Include="src\states\main_state.h" />
     <ClInclude Include="src\states\state_manager.h" />
     <ClInclude Include="src\systems\asteroid.h" />
     <ClInclude Include="src\systems\common.h" />
+    <ClInclude Include="src\systems\fade_timer.h" />
     <ClInclude Include="src\systems\fountain_projectile.h" />
     <ClInclude Include="src\systems\physics.h" />
+    <ClInclude Include="src\systems\playership.h" />
     <ClInclude Include="src\systems\sprite.h" />
     <ClInclude Include="src\systems\transform.h" />
     <ClInclude Include="src\systems\wallbounce.h" />

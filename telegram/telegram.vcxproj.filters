@@ -69,6 +69,15 @@
     <ClCompile Include="src\texture_manager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\systems\playership.cpp">
+      <Filter>Source Files\systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\keyboard_input.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\systems\fade_timer.cpp">
+      <Filter>Source Files\systems</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\external\corgi\include\corgi\entity_common.h">
@@ -99,9 +108,6 @@
       <Filter>corgi</Filter>
     </ClInclude>
     <ClInclude Include="..\external\corgi\include\corgi\system_interface.h">
-      <Filter>corgi</Filter>
-    </ClInclude>
-    <ClInclude Include="..\external\corgi\include\corgi\network_system.h">
       <Filter>corgi</Filter>
     </ClInclude>
     <ClInclude Include="src\systems\transform.h">
@@ -139,6 +145,15 @@
     </ClInclude>
     <ClInclude Include="src\texture_manager.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\systems\playership.h">
+      <Filter>Source Files\systems</Filter>
+    </ClInclude>
+    <ClInclude Include="src\keyboard_input.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\systems\fade_timer.h">
+      <Filter>Source Files\systems</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
