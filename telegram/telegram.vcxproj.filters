@@ -51,9 +51,6 @@
     <ClCompile Include="src\systems\common.cpp">
       <Filter>Source Files\systems</Filter>
     </ClCompile>
-    <ClCompile Include="src\systems\fountain_projectile.cpp">
-      <Filter>Source Files\systems</Filter>
-    </ClCompile>
     <ClCompile Include="src\systems\physics.cpp">
       <Filter>Source Files\systems</Filter>
     </ClCompile>
@@ -130,9 +127,6 @@
     </ClInclude>
     <ClInclude Include="src\math_common.h">
       <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\systems\fountain_projectile.h">
-      <Filter>Source Files\systems</Filter>
     </ClInclude>
     <ClInclude Include="src\systems\physics.h">
       <Filter>Source Files\systems</Filter>

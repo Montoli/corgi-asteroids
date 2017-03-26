@@ -149,7 +149,6 @@ xcopy /y /d  "$(ProjectDir)rsc\*" "$(OutDir)rsc"</Command>
     <ClCompile Include="src\systems\astroid.cpp" />
     <ClCompile Include="src\systems\common.cpp" />
     <ClCompile Include="src\systems\fade_timer.cpp" />
-    <ClCompile Include="src\systems\fountain_projectile.cpp" />
     <ClCompile Include="src\systems\physics.cpp" />
     <ClCompile Include="src\systems\playership.cpp" />
     <ClCompile Include="src\systems\sprite.cpp" />
@@ -176,7 +175,6 @@ xcopy /y /d  "$(ProjectDir)rsc\*" "$(OutDir)rsc"</Command>
     <ClInclude Include="src\systems\asteroid.h" />
     <ClInclude Include="src\systems\common.h" />
     <ClInclude Include="src\systems\fade_timer.h" />
-    <ClInclude Include="src\systems\fountain_projectile.h" />
     <ClInclude Include="src\systems\physics.h" />
     <ClInclude Include="src\systems\playership.h" />
     <ClInclude Include="src\systems\sprite.h" />
