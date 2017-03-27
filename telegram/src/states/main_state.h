@@ -11,6 +11,7 @@
 #include "systems/wallbounce.h"
 #include "systems/playership.h"
 #include "systems/fade_timer.h"
+#include "systems/bullet.h"
 
 #include "base_state.h"
 #include "keyboard_input.h"
@@ -49,6 +50,8 @@ private:
   PhysicsSystem physics_system_;
   WallBounceSystem wallbounce_system_;
   FadeTimerSystem fade_timer_system_;
+  BulletSystem bullet_system_;
+
 
 };
 

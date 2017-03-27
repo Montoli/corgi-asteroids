@@ -8,16 +8,18 @@
 #include "common.h"
 #include "fade_timer.h"
 #include "constants.h"
+#include "bullet.h"
 
 
 CORGI_DEFINE_SYSTEM(PlayerShip, PlayerShipData)
 
-static const float kTurnSpeed = -0.1f;
-static const float kThrust = 0.15f;
-static const float kMaxSpeed = 5.0f;
+const float kTurnSpeed = -0.1f;
+const float kThrust = 0.15f;
+const float kMaxSpeed = 5.0f;
 
-static const float kExhaustSpeed = -3.0f;
-
+const float kExhaustSpeed = -3.0f;
+const float kBulletSpeed = 10.0f;
+const float kShipDrag = 0.995f;
 
 // basic orientation is pointing straight up.
 static const vec3 kBaseOrientation = vec3(0, 1, 0);
@@ -49,8 +51,31 @@ void PlayerShip::UpdateAllEntities(corgi::WorldTime delta_time) {
       velocity += vec2(heading.x(), -heading.y()) * kThrust;
       SpawnExhaust(itr->entity);
     }
+    if (common->keyboard_input->GetKeyState(SDLK_SPACE).is_down) {
+      FireGun(itr->entity);
+    }
+    velocity *= kShipDrag;
+
   }
 }
+
+
+void PlayerShip::FireGun(corgi::Entity ship) {
+  TransformData* ship_transform = Data<TransformData>(ship);
+
+  corgi::Entity bullet = entity_manager_->AllocateNewEntity();
+  entity_manager_->AddComponent<BulletSystem>(bullet);
+
+  TransformData* bullet_transform = Data<TransformData>(bullet);
+  vec2 heading = (ship_transform->orientation * kBaseOrientation).xy().Normalized();
+  heading.y() = -heading.y();
+  bullet_transform->orientation = ship_transform->orientation;
+  bullet_transform->position = ship_transform->position + vec3(heading * 15.0f, 0);
+
+  PhysicsData* bullet_physics = Data<PhysicsData>(bullet);
+  bullet_physics->velocity = heading * kBulletSpeed;
+}
+
 
 // Makes an exhaust particle trailing behind the ship.
 void PlayerShip::SpawnExhaust(corgi::Entity ship) {

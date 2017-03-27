@@ -75,6 +75,9 @@
     <ClCompile Include="src\systems\fade_timer.cpp">
       <Filter>Source Files\systems</Filter>
     </ClCompile>
+    <ClCompile Include="src\systems\bullet.cpp">
+      <Filter>Source Files\systems</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\external\corgi\include\corgi\entity_common.h">
@@ -151,6 +154,9 @@
     </ClInclude>
     <ClInclude Include="src\constants.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\systems\bullet.h">
+      <Filter>Source Files\systems</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

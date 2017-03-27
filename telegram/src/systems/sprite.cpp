@@ -42,7 +42,7 @@ void SpriteSystem::UpdateAllEntities(corgi::WorldTime delta_time) {
   int index = 0;
   for (auto itr = tex_count.begin(); itr != tex_count.end(); ++itr) {
     buffer[itr->first] = BufferInfo(index);
-    index += itr->second * kFloatsPerPoint * kPointsPerSprite;
+    index += (1 + itr->second) * kFloatsPerPoint * kPointsPerSprite;
   }
 
 	for (auto itr = begin(); itr != end(); ++itr) {
@@ -69,7 +69,6 @@ void SpriteSystem::UpdateAllEntities(corgi::WorldTime delta_time) {
 		p2 = transform_matrix * p2;
 		p3 = transform_matrix * p3;
 		p4 = transform_matrix * p4;
-
 
 		AddPointToBuffer(b_info, p1, vec2(0, 0), sprite_data->tint);
 		AddPointToBuffer(b_info, p2, vec2(1, 0), sprite_data->tint);

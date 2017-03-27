@@ -19,6 +19,7 @@ public:
 
 private:
   void SpawnExhaust(corgi::Entity ship);
+  void FireGun(corgi::Entity ship);
 
 };
 
