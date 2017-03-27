@@ -7,10 +7,8 @@ and may not be redistributed without written permission.*/
 #include "GL/glew.h"
 #include "states/state_manager.h"
 #include "states/main_state.h"
+#include "constants.h"
 
-//Screen dimension constants
-const int SCREEN_WIDTH = 640;
-const int SCREEN_HEIGHT = 480;
 
 int main(int argc, char* args[])
 {
@@ -33,8 +31,8 @@ int main(int argc, char* args[])
 			"SDL Tutorial", 
 			SDL_WINDOWPOS_UNDEFINED, 
 			SDL_WINDOWPOS_UNDEFINED, 
-			SCREEN_WIDTH,
-			SCREEN_HEIGHT, 
+			kScreenWidth,
+			kScreenHeight, 
 			SDL_WINDOW_OPENGL);
 
     if (window == NULL)
@@ -70,15 +68,16 @@ int main(int argc, char* args[])
 			// the context?
 			glewInit();
 
-
       // Set blend modes:
       glEnable(GL_BLEND);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      glEnable(GL_DEPTH_TEST);
+      glDepthFunc(GL_GREATER);
 
       StateManager state_manager;
 
       state_manager.PushState(new MainState(window, screen_surface, gl_context,
-				SCREEN_WIDTH, SCREEN_HEIGHT));
+				kScreenWidth, kScreenHeight));
 
       while (!state_manager.IsAppQuitting()) {
         SDL_Delay(1000/60);

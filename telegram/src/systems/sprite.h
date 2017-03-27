@@ -23,7 +23,6 @@ struct BufferInfo {
     count(0) {
   }
 
-
   BufferInfo(int startIndex) :
     start_index(startIndex),
     length(0),

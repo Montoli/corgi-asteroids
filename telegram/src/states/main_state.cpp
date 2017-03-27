@@ -65,7 +65,7 @@ void MainState::Init() {
 
 
 
-  for (int i = 0; i < 15; i++) {
+  for (int i = 0; i < 1; i++) {
     corgi::Entity new_asteroid = entity_manager_.AllocateNewEntity();
     entity_manager_.AddComponent<AsteroidSystem>(new_asteroid);
   }
@@ -75,7 +75,8 @@ void MainState::Init() {
 
 void MainState::Render(double delta_time) {
 	glClearColor(0, 1, 0, 1);
-	glClear(GL_COLOR_BUFFER_BIT);
+  glClearDepth(0);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	sprite_system_.RenderSprites();
 	SDL_GL_SwapWindow(common_system_.CommonData()->window);
@@ -111,10 +112,6 @@ void MainState::UpdateInput() {
 
 
 void MainState::Update(double delta_time) {
-	//printf("---------------------------------------------\n");
-	//printf("start of update!\n");
-	//printf("---------------------------------------------\n");
-
   entity_manager_.UpdateSystems(delta_time);
   UpdateInput();
   if (keyboard_input_.GetKeyState(SDLK_ESCAPE).was_released) {

@@ -56,16 +56,20 @@ void SpriteSystem::UpdateAllEntities(corgi::WorldTime delta_time) {
 		
 		vec4 origin_offset = vec4(transform_data->origin.x(),
 				transform_data->origin.y(), 0.0f, 0.0f);
-		vec4 p1 = vec4(0.0f,  0.0f,   0.0f, 1.0f) - origin_offset;
-		vec4 p2 = vec4(width, 0.0f,   0.0f, 1.0f) - origin_offset;
-		vec4 p3 = vec4(0.0f,  height, 0.0f, 1.0f) - origin_offset;
-		vec4 p4 = vec4(width, height, 0.0f, 1.0f) - origin_offset;
+
+    float depth = transform_data->position.z();
+
+		vec4 p1 = vec4(0.0f,  0.0f,   depth, 1.0f) - origin_offset;
+		vec4 p2 = vec4(width, 0.0f,   depth, 1.0f) - origin_offset;
+		vec4 p3 = vec4(0.0f,  height, depth, 1.0f) - origin_offset;
+		vec4 p4 = vec4(width, height, depth, 1.0f) - origin_offset;
 
 		mat4 transform_matrix = transform_data->GetTransformMatrix();
 		p1 = transform_matrix * p1;
 		p2 = transform_matrix * p2;
 		p3 = transform_matrix * p3;
 		p4 = transform_matrix * p4;
+
 
 		AddPointToBuffer(b_info, p1, vec2(0, 0), sprite_data->tint);
 		AddPointToBuffer(b_info, p2, vec2(1, 0), sprite_data->tint);
@@ -125,11 +129,6 @@ void SpriteSystem::InitEntity(corgi::Entity entity) {
 void SpriteSystem::RenderSprites() {
 	CommonComponent* common = entity_manager_->GetSystem<CommonSystem>()->CommonData();
 	mat4 vp_matrix = mat4::Ortho(0.0f, 640.0f, 480.0f, 0.0f, -1.0f, 1.0f, 1.0f);
-
-	GLfloat vVertices[] = { 
-		0.0f,  0.0f, 0.0f,    0.0f, 0.0f,  1.0f, 1.0f, 1.0f, 1.0f,
-		100.0f, 100.0f, 0.0f,   0.0f, 0.0f,  1.0f, 1.0f, 0.0f, 1.0f,
-		100.0f, 0.0f,  0.0f,   0.0f, 0.0f,  0.0f, 1.0f, 1.0f, 1.0f };
 
 	// Set the viewport
 	glViewport(0, 0, static_cast<GLsizei>(common->screen_size.x()),
@@ -235,11 +234,6 @@ void SpriteSystem::Init() {
 
 	// Link the program
 	glLinkProgram(programObject);
-
-	//assert(kVertexLoc == glGetAttribLocation(programObject, "a_vertex"));
-	//assert(kTextureUVLoc == glGetAttribLocation(programObject, "a_tex_uv"));
-	//assert(kTintLoc == glGetAttribLocation(programObject, "a_tint"));
-
 
 	GLint infoLen = 0;
 	glGetProgramiv(programObject, GL_INFO_LOG_LENGTH, &infoLen);

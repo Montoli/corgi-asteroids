@@ -5,6 +5,7 @@
 #include "physics.h"
 #include "wallbounce.h"
 #include <stdio.h>
+#include "constants.h"
 
 
 CORGI_DEFINE_SYSTEM(AsteroidSystem, AsteroidData)
@@ -38,7 +39,7 @@ void AsteroidSystem::InitEntity(corgi::Entity entity) {
 
   TransformData* transform = Data<TransformData>(entity);
   transform->origin = vec2(0.5f, 0.5f);
-  transform->position = vec3(rnd() * 640, rnd() * 480, 0);
+  transform->position = vec3(rnd() * 640, rnd() * 480, kLayerAsteroids);
   transform->scale = vec2(asteroid->radius, asteroid->radius);
 
   SpriteData* sprite = Data<SpriteData>(entity);
@@ -49,5 +50,5 @@ void AsteroidSystem::InitEntity(corgi::Entity entity) {
   sprite->texture = asteroid_texture;
 
   physics->angular_velocity = quat::FromAngleAxis(rnd() * 0.1f - 0.05f, vec3(0.0f, 0.0f, 1.0f));
-
+  physics->velocity = vec2(rnd() * 1.0f - 0.5f, rnd() * 1.0f - 0.5f);
 }
