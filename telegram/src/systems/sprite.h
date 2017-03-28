@@ -46,7 +46,7 @@ public:
 private:
 	void AddPointToBuffer(BufferInfo& buffer, vec4 p, vec2 uv, vec4 tint);
 
-	static const int kMaxSprites = 500;
+	static const int kMaxSprites = 1500;
 	static const int kPointsPerSprite = 6;
 
 	// 4 points, each point contains 3 axis coordinates, 2 UV coordinates, and 4 tint values.

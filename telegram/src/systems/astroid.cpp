@@ -92,6 +92,13 @@ void AsteroidSystem::ApplyDamage(corgi::Entity asteroid, float damage) {
         corgi::Entity new_asteroid = entity_manager_->AllocateNewEntity();
         entity_manager_->AddComponent<AsteroidSystem>(new_asteroid);
 
+        // Pointers to data are not guaranteed to be valid,
+        // an entity allocation, or component assignment, so we
+        // need to fetch these again:
+        data = Data<AsteroidData>(asteroid);
+        transform = Data<TransformData>(asteroid);
+
+
         float new_radius = (rnd() * 0.25f + 0.4f) * data->radius;
 
         AsteroidData* new_asteroid_data = Data<AsteroidData>(new_asteroid);

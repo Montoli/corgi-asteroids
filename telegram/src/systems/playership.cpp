@@ -61,11 +61,10 @@ void PlayerShip::UpdateAllEntities(corgi::WorldTime delta_time) {
 
 
 void PlayerShip::FireGun(corgi::Entity ship) {
-  TransformData* ship_transform = Data<TransformData>(ship);
-
   corgi::Entity bullet = entity_manager_->AllocateNewEntity();
   entity_manager_->AddComponent<BulletSystem>(bullet);
 
+  TransformData* ship_transform = Data<TransformData>(ship);
   TransformData* bullet_transform = Data<TransformData>(bullet);
   vec2 heading = (ship_transform->orientation * kBaseOrientation).xy().Normalized();
   heading.y() = -heading.y();
