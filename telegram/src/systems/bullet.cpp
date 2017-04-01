@@ -12,10 +12,10 @@
 
 CORGI_DEFINE_SYSTEM(BulletSystem, BulletData)
 
-const float kBulletRadius = 2.5f;
-const float kBulletDamage = 2.0f;
-
 void BulletSystem::UpdateAllEntities(corgi::WorldTime delta_time) {
+  for (int i = 0; i < kBucketRows * kBucketColumns; i++) {
+    collision_map[i].clear();
+  }
   for (auto itr = begin(); itr != end(); ++itr) {
     TransformData* transform = Data<TransformData>(itr->entity);
     if (transform->position.x() < 0 ||
@@ -23,25 +23,69 @@ void BulletSystem::UpdateAllEntities(corgi::WorldTime delta_time) {
         transform->position.x() >= kScreenWidth ||
         transform->position.y() >= kScreenHeight) {
       entity_manager_->DeleteEntity(itr->entity);
-    }
+    } else {
+      // Store a reference to each bullet in a "bucket"
+      // representing the general area it lives on the
+      // screen.  (For speeding up collision detections later.)
 
-    AsteroidSystem* asteroid_system = GetSystem<AsteroidSystem>();
-    corgi::Entity hit = asteroid_system->CollisionCheck(
-        transform->position.xy(), kBulletRadius);
-    if (hit != corgi::kInvalidEntityId) {
-      asteroid_system->ApplyDamage(hit, kBulletDamage);
-      SpawnHitSparks(itr->entity);
-      entity_manager_->DeleteEntity(itr->entity);
+      int bucket_index = GetBucketIndex(transform->position.xy());
+      collision_map[bucket_index].insert(itr->entity);
     }
-
   }
 }
+
+
+void BulletSystem::CheckForAsteroidHit(corgi::Entity asteroid_entity) {
+  AsteroidData* asteroid = Data<AsteroidData>(asteroid_entity);
+  TransformData* transform = Data<TransformData>(asteroid_entity);
+  
+  int top    = (transform->position.y() - asteroid->radius) / kBucketSize;
+  int left   = (transform->position.x() - asteroid->radius) / kBucketSize;
+  int bottom = (transform->position.y() + asteroid->radius) / kBucketSize;
+  int right  = (transform->position.x() + asteroid->radius) / kBucketSize;
+
+  if (top < 0) top = 0;
+  if (bottom >= kBucketRows) bottom = kBucketRows - 1;
+  if (left < 0) left = 0;
+  if (right >= kBucketColumns) right = kBucketColumns - 1;
+
+  for (int x = left; x <= right; x++) {
+    for (int y = top; y <= bottom; y++) {
+      int bucket_index = x + y * kBucketColumns;
+      for (auto itr = collision_map[bucket_index].begin();
+          itr != collision_map[bucket_index].end(); ++itr) {
+
+        if (!entity_manager_->IsEntityMarkedForDeletion(*itr)) {
+
+          TransformData* bullet_transform = Data<TransformData>(*itr);
+
+          vec2 diff = transform->position.xy() - bullet_transform->position.xy();
+          float dist_squared = diff.x() * diff.x() + diff.y() * diff.y();
+
+          float rad_squared = (kBulletRadius + asteroid->radius) *
+            (kBulletRadius + asteroid->radius);
+
+          if (dist_squared < rad_squared) {
+            SpawnHitSparks(*itr);
+
+            GetSystem<AsteroidSystem>()->ApplyDamage(
+                asteroid_entity, kBulletDamage);
+
+            entity_manager_->DeleteEntity(*itr);
+          }
+        }
+      }
+    }
+  }
+}
+
+
 
 void BulletSystem::DeclareDependencies() {
 	DependOn<SpriteSystem>(corgi::kExecuteBefore, corgi::kReadWriteAccess);
 	DependOn<TransformSystem>(corgi::kExecuteBefore, corgi::kReadWriteAccess);
   DependOn<PhysicsSystem>(corgi::kExecuteAfter, corgi::kReadWriteAccess);
-  DependOn<AsteroidSystem>(corgi::kExecuteAfter, corgi::kReadWriteAccess);
+  DependOn<AsteroidSystem>(corgi::kExecuteBefore, corgi::kReadWriteAccess);
   DependOn<FadeTimerSystem>(corgi::kExecuteAfter, corgi::kReadWriteAccess);
 
   RequireComponent<SpriteSystem>();
@@ -98,4 +142,30 @@ void BulletSystem::InitEntity(corgi::Entity entity) {
 
   physics->angular_velocity = quat::FromAngleAxis(rnd() * 0.1f - 0.05f, vec3(0.0f, 0.0f, 1.0f));
   physics->velocity = vec2(rnd() * 1.0f - 0.5f, rnd() * 1.0f - 0.5f);
+}
+
+int BulletSystem::GetBucketIndex(vec2 position) {
+  int column = position.x() / kBucketSize;
+  int row = position.y() / kBucketSize;
+
+  if (row < 0) row = 0;
+  if (row >= kBucketRows) row = kBucketRows - 1;
+  if (column < 0) column = 0;
+  if (column >= kBucketColumns) column = kBucketColumns - 1;
+
+  int index = column + row * kBucketColumns;
+  assert(index >= 0);
+  assert(index < kBucketColumns * kBucketColumns);
+
+  return index;
+}
+
+
+
+void BulletSystem::CleanupEntity(corgi::Entity entity) {
+  /*
+  TransformData* transform = Data<TransformData>(entity);
+  int bucket_index = GetBucketIndex(transform->position.xy());
+  collision_map[bucket_index].erase(entity);
+  */
 }

@@ -20,7 +20,7 @@ public:
 
   // Check to see if something has hit an asteroid.  If so,
   // return the asteroid entity hit.
-  corgi::Entity CollisionCheck(vec2 position, float radius);
+  //corgi::Entity CollisionCheck(vec2 position, float radius);
   // Apply damage to an asteroid.  May blow it up.
   void ApplyDamage(corgi::Entity, float damage);
 };

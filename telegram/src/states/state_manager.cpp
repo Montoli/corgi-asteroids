@@ -1,28 +1,5 @@
 #include "state_manager.h"
 
-/*
-class StateManager {
-public:
-void Update(float delta_time);
-void Render(float delta_time);
-
-
-int StateCount() { return state_stack_.size(); }
-bool IsAppQuitting() { return is_app_quitting_;  }
-
-private:
-
-corgi::EntityManager entity_manager;
-
-std::vector<std::unique_ptr<BaseState>> state_stack_;
-std::vector<std::unique_ptr<BaseState>> states_to_push_;
-
-bool is_app_quitting_ = false;
-bool stack_locked_ = false;
-};
-
-*/
-
 void StateManager::Update(double delta_time) {
   if (state_stack_.size() > 0) {
     // Store off the old current state, and update it.  Then call the update function

@@ -6,6 +6,8 @@
 #include "wallbounce.h"
 #include <stdio.h>
 #include "constants.h"
+#include "bullet.h"
+#include <unordered_set>
 
 
 CORGI_DEFINE_SYSTEM(AsteroidSystem, AsteroidData)
@@ -19,9 +21,10 @@ void AsteroidSystem::UpdateAllEntities(corgi::WorldTime delta_time) {
     }
   }
 
-  //for (auto itr = begin(); itr != end(); ++itr) {
-    // anything?
-  //}
+  BulletSystem* bullet_system = GetSystem<BulletSystem>();
+  for (auto itr = begin(); itr != end(); ++itr) {
+    bullet_system->CheckForAsteroidHit(itr->entity);
+  }
 }
 
 void AsteroidSystem::DeclareDependencies() {
@@ -29,6 +32,7 @@ void AsteroidSystem::DeclareDependencies() {
 	DependOn<TransformSystem>(corgi::kExecuteBefore, corgi::kReadWriteAccess);
   DependOn<PhysicsSystem>(corgi::kExecuteAfter, corgi::kReadWriteAccess);
   DependOn<WallBounceSystem>(corgi::kNoOrderDependency, corgi::kReadAccess);
+  DependOn<BulletSystem>(corgi::kExecuteAfter, corgi::kNoAccessDependency);
 
   RequireComponent<SpriteSystem>();
   RequireComponent<TransformSystem>();
@@ -60,33 +64,15 @@ void AsteroidSystem::InitEntity(corgi::Entity entity) {
   physics->velocity = vec2(rnd() * 1.0f - 0.5f, rnd() * 1.0f - 0.5f);
 }
 
-
-corgi::Entity AsteroidSystem::CollisionCheck(vec2 position, float radius) {
-  for (auto itr = begin(); itr != end(); ++itr) {
-    TransformData* transform = Data<TransformData>(itr->entity);
-    AsteroidData* asteroid = Data<AsteroidData>(itr->entity);
-
-    vec2 diff = transform->position.xy() - position;
-    float dist_squared = diff.x() * diff.x() + diff.y() * diff.y();
-
-    float rad_squared = (radius + asteroid->radius) * (radius + asteroid->radius);
-
-    if (dist_squared < rad_squared) {
-      return itr->entity;
-    }
-  }
-  return corgi::kInvalidEntityId;
-
-}
-
-
 void AsteroidSystem::ApplyDamage(corgi::Entity asteroid, float damage) {
   AsteroidData* data = Data<AsteroidData>(asteroid);
+  float radius = data->radius;
   TransformData* transform = Data<TransformData>(asteroid);
 
   data->hp -= damage;
-  if (data->hp < 0) {
-    if (data->radius > 15.0f) {
+  if (data->hp <= 0) {
+    data->hp = 100;
+    if (radius > 15.0f) {
       // Spawn some new asteroids!
       for (int i = 0; i < 3; i++) {
         corgi::Entity new_asteroid = entity_manager_->AllocateNewEntity();
@@ -95,16 +81,12 @@ void AsteroidSystem::ApplyDamage(corgi::Entity asteroid, float damage) {
         // Pointers to data are not guaranteed to be valid,
         // an entity allocation, or component assignment, so we
         // need to fetch these again:
-        data = Data<AsteroidData>(asteroid);
         transform = Data<TransformData>(asteroid);
 
-
-        float new_radius = (rnd() * 0.25f + 0.4f) * data->radius;
-
+        float new_radius = (rnd() * 0.25f + 0.4f) * radius;
         AsteroidData* new_asteroid_data = Data<AsteroidData>(new_asteroid);
         new_asteroid_data->radius = new_radius;
         new_asteroid_data->hp = new_radius * kHpScale;
-
         TransformData* new_transform = Data<TransformData>(new_asteroid);
         new_transform->scale = vec2(new_asteroid_data->radius * 2.0f, new_asteroid_data->radius * 2.0f);
         new_transform->position = transform->position;
@@ -113,7 +95,7 @@ void AsteroidSystem::ApplyDamage(corgi::Entity asteroid, float damage) {
           rnd() * (100.0f / new_radius), rnd() * (100.0f / new_radius));
       }
     }
-    entity_manager_->DeleteEntity(asteroid);
+    //entity_manager_->DeleteEntity(asteroid);
   }
 
 

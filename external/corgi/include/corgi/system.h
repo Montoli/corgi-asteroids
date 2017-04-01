@@ -434,10 +434,12 @@ class System : public SystemInterface {
     assert(entity_manager_->is_system_list_final());
 
     for (auto itr = autoadd_systems_.begin();
-        itr != autoadd_systems_.end(); ++itr) {
+      itr != autoadd_systems_.end(); ++itr) {
       SystemInterface* system = entity_manager_->GetSystem(*itr);
       assert(system);
-      system->AddEntityGenerically(entity);
+      if (!system->HasDataForEntity(entity)) {
+        system->AddEntityGenerically(entity);
+      }
     }
   }
 
@@ -571,7 +573,6 @@ class System : public SystemInterface {
   /// @var component_data_
   ///
   /// @brief Storage for all of the data for the System.
-  //VectorPool<ComponentData> component_data_;
 	std::vector<ComponentData> component_data_;
 
   /// @var entity_manager_
