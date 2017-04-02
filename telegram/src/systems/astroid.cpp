@@ -95,7 +95,7 @@ void AsteroidSystem::ApplyDamage(corgi::Entity asteroid, float damage) {
           rnd() * (100.0f / new_radius), rnd() * (100.0f / new_radius));
       }
     }
-    //entity_manager_->DeleteEntity(asteroid);
+    entity_manager_->DeleteEntity(asteroid);
   }
 
 

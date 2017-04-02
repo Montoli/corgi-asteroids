@@ -132,14 +132,18 @@ class System : public SystemInterface {
     if (HasDataForEntity(entity)) {
       return GetComponentData(entity);
     }
+
     // No existing data, so we allocate some and return it:
-		component_data_.push_back(ComponentData());
-		ComponentIndex index = static_cast<ComponentIndex>(component_data_.size() - 1);
-    component_index_lookup_[entity] = index;
-		component_data_[index].entity = entity;
+    // It gets added first to the recently_added_data map,
+    // so it doesn't interfere if it is being added iteration.
+    // It gets shuffled back in to the main pool during the
+    // postUpdate step.
+    recently_added_data_[entity] = ComponentData();
+    ComponentData* component_data = &recently_added_data_[entity];
+    component_data->entity = entity;
     AddSystemDependencies(entity);
     InitEntity(entity);
-    return &(component_data_[index].data);
+    return &(component_data->data);
   }
 
   /// @brief Removes an Entity from the list of Entities.
@@ -156,15 +160,24 @@ class System : public SystemInterface {
     // entities are associated with which components.  Use HasDataForEntity()
     // if you want to double-check if data exists before removing it.
     assert(HasDataForEntity(entity));
-    RemoveEntityInternal(entity);
-		ComponentIndex index = component_index_lookup_[entity];
 
-		component_index_lookup_.erase(entity);
-		if (component_data_.size() > 1) {
-			component_data_[index] = std::move(component_data_[component_data_.size() - 1]);
-			component_index_lookup_[component_data_[index].entity] = index;
-		}
-		component_data_.pop_back();
+    if (component_index_lookup_.find(entity) !=
+        component_index_lookup_.end()) {
+      RemoveEntityInternal(entity);
+      ComponentIndex index = component_index_lookup_[entity];
+
+      component_index_lookup_.erase(entity);
+      if (component_data_.size() > 1) {
+        component_data_[index] =
+            std::move(component_data_[component_data_.size() - 1]);
+        component_index_lookup_[component_data_[index].entity] = index;
+      }
+      component_data_.pop_back();
+    } else if (recently_added_data_.find(entity) !=
+        recently_added_data_.end()){
+      RemoveEntityInternal(entity);
+      recently_added_data_.erase(entity);
+    }
   }
 
 
@@ -186,15 +199,30 @@ class System : public SystemInterface {
   /// by the EntityManager.
   virtual void UpdateAllEntities(WorldTime /*delta_time*/) {}
 
+  /// @brief Called at the end of each update frame, after all
+  /// updates are completed.  A place where systems can perform
+  /// any final updates needed.  (Usually where deferred adds and
+  /// deletions take place.)
+  virtual void PostUpdate() {
+    for (auto itr = recently_added_data_.begin();
+        itr != recently_added_data_.end(); ++itr) {
+      component_data_.push_back(std::move(itr->second));
+      ComponentIndex index = static_cast<ComponentIndex>(component_data_.size() - 1);
+      component_index_lookup_[itr->first] = index;
+    }
+    recently_added_data_.clear();
+  }
+
   /// @brief Checks if this component contains any data associated with the
   /// supplied entity.
   virtual bool HasDataForEntity(const Entity entity) {
-    return GetComponentDataIndex(entity) != kInvalidSystem;
+    return (GetComponentDataIndex(entity) != kInvalidEntityId ||
+      recently_added_data_.find(entity) != recently_added_data_.end());
   }
 
   /// @brief Gets the data for a given Entity as a void pointer.
   ///
-  /// @note When using GetSystemDataAsVoid, the calling function is expected
+  /// @note When using GetComponentDataAsVoid, the calling function is expected
   /// to know how to handle the data (since it is returned as a void pointer).
   ///
   /// @warning This pointer is NOT stable in memory. Calls to AddEntity and
@@ -206,13 +234,13 @@ class System : public SystemInterface {
   ///
   /// @return Returns the Entity's data as a void pointer, or returns a nullptr
   /// if the data does not exist.
-  virtual void* GetSystemDataAsVoid(const Entity entity) {
+  virtual void* GetComponentDataAsVoid(const Entity entity) {
     return GetComponentData(entity);
   }
 
   /// @brief Gets the data for a given Entity as a const void pointer.
   ///
-  /// @note When using GetSystemDataAsVoid, the calling function is expected
+  /// @note When using GetComponentDataAsVoid, the calling function is expected
   /// to know how to handle the data (since it is returned as a const
   /// void pointer).
   ///
@@ -225,7 +253,7 @@ class System : public SystemInterface {
   ///
   /// @return Returns the Entity's data as a const void pointer, or returns a
   /// nullptr if the data does not exist.
-  virtual const void* GetSystemDataAsVoid(const Entity entity) const {
+  virtual const void* GetComponentDataAsVoid(const Entity entity) const {
     return GetComponentData(entity);
   }
 
@@ -243,8 +271,13 @@ class System : public SystemInterface {
   /// does not exist.
   T* GetComponentData(const Entity entity) {
 		size_t data_index = GetComponentDataIndex(entity);
-		if (data_index == kInvalidSystem) {
-			return nullptr;
+		if (data_index == kInvalidEntityId) {
+      auto new_data = recently_added_data_.find(entity);
+      if (new_data != recently_added_data_.end()) {
+        return &(recently_added_data_[entity].data);
+      } else {
+        return nullptr;
+      }
 		}
 		ComponentData* element_data = &(component_data_[data_index]);
 		return (element_data != nullptr) ? &(element_data->data) : nullptr;
@@ -567,13 +600,19 @@ class System : public SystemInterface {
   size_t GetComponentDataIndex(const Entity entity) const {
     auto result = component_index_lookup_.find(entity);
     return (result != component_index_lookup_.end()) ? result->second
-                                                     : kInvalidSystem;
+                                                     : kInvalidEntityId;
   }
 
   /// @var component_data_
   ///
   /// @brief Storage for all of the data for the System.
 	std::vector<ComponentData> component_data_;
+
+  /// @var recently_added_data_
+  ///
+  /// @brief Data that's been added this frame, but hasn't been
+  /// moved into component_data_ yet.
+  std::unordered_map<Entity, ComponentData> recently_added_data_;
 
   /// @var entity_manager_
   ///

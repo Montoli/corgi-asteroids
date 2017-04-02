@@ -63,6 +63,12 @@ public:
 	/// from this System.
 	virtual void RemoveEntity(Entity entity) = 0;
 
+  /// @brief Called at the end of each update frame, after all
+  /// updates are completed.  A place where systems can perform
+  /// any final updates needed.  (Usually where deferred adds and
+  /// deletions take place.)
+  virtual void PostUpdate() = 0;
+
 	/// @brief Update all Entities that contain this System.
 	///
 	/// @param[in] delta_time A WorldTime corresponding to the
@@ -79,7 +85,7 @@ public:
 
 	/// @brief Gets the data for a given Entity as a void pointer.
 	///
-	/// @note When using GetSystemDataAsVoid, the calling function is expected
+	/// @note When using GetComponentDataAsVoid, the calling function is expected
 	/// to know how to handle the data (since it is returned as a void pointer).
 	///
 	/// @warning This pointer is NOT stable in memory. Calls to
@@ -88,11 +94,11 @@ public:
 	///
 	/// @return Returns the Entity's data as a void pointer, or returns a nullptr
 	/// if the data does not exist.
-	virtual void* GetSystemDataAsVoid(const Entity) = 0;
+	virtual void* GetComponentDataAsVoid(const Entity) = 0;
 
 	/// @brief Gets the data for a given ntity as a const void pointer.
 	///
-	/// @note When using GetSystemDataAsVoid, the calling function is expected
+	/// @note When using GetComponentDataAsVoid, the calling function is expected
 	/// to know how to handle the data (since it is returned as a const
 	/// void pointer).
 	///
@@ -102,7 +108,7 @@ public:
 	///
 	/// @return Returns the Entity's data as a const void pointer, or returns a
 	/// nullptr if the data does not exist.
-	virtual const void* GetSystemDataAsVoid(const Entity) const = 0;
+	virtual const void* GetComponentDataAsVoid(const Entity) const = 0;
 
 	/// @ brief Returns the name of the system, as a string.  Useful
 	/// for debugging.

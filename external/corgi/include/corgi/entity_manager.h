@@ -88,7 +88,7 @@ class EntityManager {
   template <typename T>
   T* GetComponentData(const Entity entity) {
     return static_cast<T*>(
-        GetSystemDataAsVoid(entity, SystemIdLookup<T>::system_id));
+        GetComponentDataAsVoid(entity, SystemIdLookup<T>::system_id));
   }
 
   /// @brief A helper function for marshalling data from a System.
@@ -102,7 +102,7 @@ class EntityManager {
   template <typename T>
   const T* GetComponentData(const Entity entity) const {
     return static_cast<const T*>(
-        GetSystemDataAsVoid(entity, SystemIdLookup<T>::system_id));
+        GetComponentDataAsVoid(entity, SystemIdLookup<T>::system_id));
   }
 
   /// @brief A helper function for getting a particular System, given
@@ -389,7 +389,7 @@ class EntityManager {
   /// is returned as a void pointer. Typically a System is registered with a
   /// struct (or class) of System data, however this function returns the
   /// data as a void pointer, rather than a specific System data type.
-  void* GetSystemDataAsVoid(Entity entity, SystemId system_id);
+  void* GetComponentDataAsVoid(Entity entity, SystemId system_id);
 
   /// @brief Given a component ID and an Entity, returns all data associated
   /// with that Entity from the given System.
@@ -407,7 +407,7 @@ class EntityManager {
   /// is returned as a void pointer. Typically a System is registered with a
   /// struct (or class) of System data, however this function returns the
   /// data as a void pointer, rather than a specific System data type.
-  const void* GetSystemDataAsVoid(Entity entity,
+  const void* GetComponentDataAsVoid(Entity entity,
                                      SystemId system_id) const;
 
   /// @brief Searches through unupdated systems until it finds one that

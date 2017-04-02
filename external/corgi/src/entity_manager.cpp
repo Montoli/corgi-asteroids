@@ -123,17 +123,17 @@ void EntityManager::FinalizeSystemList() {
 	}
 }
 
-void* EntityManager::GetSystemDataAsVoid(Entity entity,
+void* EntityManager::GetComponentDataAsVoid(Entity entity,
                                             SystemId system_id) {
   return systems_[system_id]
-             ? systems_[system_id]->GetSystemDataAsVoid(entity)
+             ? systems_[system_id]->GetComponentDataAsVoid(entity)
              : nullptr;
 }
 
-const void* EntityManager::GetSystemDataAsVoid(
+const void* EntityManager::GetComponentDataAsVoid(
     Entity entity, SystemId system_id) const {
   return systems_[system_id]
-             ? systems_[system_id]->GetSystemDataAsVoid(entity)
+             ? systems_[system_id]->GetComponentDataAsVoid(entity)
              : nullptr;
 }
 
@@ -192,6 +192,11 @@ void EntityManager::UpdateSystems(WorldTime delta_time) {
 		assert(systems_being_written_to_[system_id] == 0);
 	}
 	SDL_UnlockMutex(bookkeeping_mutex_);
+
+  // Post updates:
+  for (size_t i = 0; i < systems_.size(); i++) {
+    systems_[i]->PostUpdate();
+  }
 
 	DeleteMarkedEntities();
 }
