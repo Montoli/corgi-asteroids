@@ -8,6 +8,7 @@
 #include "constants.h"
 #include "bullet.h"
 #include <unordered_set>
+#include "fade_timer.h"
 
 
 CORGI_DEFINE_SYSTEM(AsteroidSystem, AsteroidData)
@@ -34,6 +35,7 @@ void AsteroidSystem::DeclareDependencies() {
   DependOn<WallBounceSystem>(corgi::kNoOrderDependency, corgi::kReadAccess, corgi::kAutoAdd);
 
   DependOn<BulletSystem>(corgi::kExecuteAfter, corgi::kNoAccessDependency, corgi::kNoAutoAdd);
+  DependOn<FadeTimerSystem>(corgi::kExecuteAfter, corgi::kReadWriteAccess, corgi::kNoAutoAdd);
 
   SetIsThreadSafe(true);
 }
@@ -92,8 +94,43 @@ void AsteroidSystem::ApplyDamage(corgi::Entity asteroid, float damage) {
           rnd() * (100.0f / new_radius), rnd() * (100.0f / new_radius));
       }
     }
+    for (int i = 0; i < 2 + (radius * radius) / 100; i++) {
+      SpawnDebris(asteroid);
+    }
     entity_manager_->DeleteEntity(asteroid);
   }
+}
 
+void AsteroidSystem::SpawnDebris(corgi::Entity source) {
+  const char* texture_path = "rsc/asteroid.png";
+  corgi::Entity debris = entity_manager_->AllocateNewEntity();
+  entity_manager_->AddComponent<SpriteSystem>(debris);
+  entity_manager_->AddComponent<FadeTimerSystem>(debris);
+  entity_manager_->AddComponent<PhysicsSystem>(debris);
+
+  SpriteData* sprite_data = Data<SpriteData>(debris);
+  FadeTimerData* fade_data = Data<FadeTimerData>(debris);
+  PhysicsData* physics_data = Data<PhysicsData>(debris);
+  TransformData* transform_data = Data<TransformData>(debris);
+
+  AsteroidData* asteroid_data = Data<AsteroidData>(source);
+  SpriteData* source_sprite = Data<SpriteData>(source);
+  TransformData* source_transform = Data<TransformData>(source);
+
+  sprite_data->size = vec2(20, 20);
+  transform_data->origin = vec2(10, 10);
+
+  float radius = asteroid_data->radius;
+  transform_data->position = source_transform->position +
+    quat::FromAngleAxis(rnd() * M_PI, vec3(0, 0, 1)) *
+    vec3(0, rnd() * radius, 0);
+  transform_data->position.z() = kLayerParticles;
+
+  sprite_data->tint = source_sprite->tint;
+  sprite_data->texture = texture_path;
+
+  fade_data->counter = 100.0f + 50.0 * rnd();
+  fade_data->fade_point = 100.0f;
+  physics_data->velocity = vec2(rnd() * 5.0f - 2.5f, rnd() * 5.0f - 2.5f);
 
 }

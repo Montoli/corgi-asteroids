@@ -172,10 +172,11 @@ void EntityManager::UpdateSystems(WorldTime delta_time) {
 			SDL_UnlockMutex(worker_thread_mutex_);
 		} else {
 			SDL_UnlockMutex(worker_thread_mutex_);
-
-			SystemInterface* system = GetSystem(system_id);
-			system->UpdateAllEntities(delta_time_);
-			MarkSystemAsUpdated(system_id);
+      if (system_id != kInvalidSystem) {
+        SystemInterface* system = GetSystem(system_id);
+        system->UpdateAllEntities(delta_time_);
+        MarkSystemAsUpdated(system_id);
+      }
 			WakeWorkerThreads();
 		}
 	}
@@ -203,7 +204,7 @@ void EntityManager::UpdateSystems(WorldTime delta_time) {
 
 bool EntityManager::IsSystemUpdateComplete() {
 	// Have to lock the bookkeeping mutex, so that it doesn't change 
-	// while we're adding this.  (Which will lead to false positives...)
+	// while we're checking this.  (Which will lead to false positives...)
 	SDL_LockMutex(bookkeeping_mutex_);
 	bool result = !(unupdated_systems_.size() +
 		currently_updating_systems_.size() > 0);
@@ -317,13 +318,11 @@ SystemId EntityManager::ClaimSystemToUpdate(bool is_for_main_thread) {
 		}
 	}
 
-
 	if (result != kInvalidSystem)
 		MarkSystemAsUpdating(result);
 	// Mutex end!
 
 	SDL_UnlockMutex(bookkeeping_mutex_);
-
 
 	return result;
 }

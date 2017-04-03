@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include "GL/glew.h"
 
+#define MAX_CORGI_THREADS 3
 
 MainState::MainState(SDL_Window* window, SDL_Surface* screen_surface,
 	SDL_GLContext context, int screen_width, int screen_height) {
@@ -18,7 +19,6 @@ MainState::MainState(SDL_Window* window, SDL_Surface* screen_surface,
 
 
 void MainState::Init() {
-  printf("hello world!\n");
   corgi::Entity entity = entity_manager_.AllocateNewEntity();
   entity_manager_.RegisterSystem(&asteroid_system_);
 	entity_manager_.RegisterSystem(&common_system_);
@@ -30,7 +30,7 @@ void MainState::Init() {
   entity_manager_.RegisterSystem(&fade_timer_system_);
   entity_manager_.RegisterSystem(&bullet_system_);
 
-	entity_manager_.set_max_worker_threads(0);
+	entity_manager_.set_max_worker_threads(MAX_CORGI_THREADS);
 
   entity_manager_.FinalizeSystemList();
 

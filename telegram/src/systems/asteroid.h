@@ -23,6 +23,8 @@ public:
   //corgi::Entity CollisionCheck(vec2 position, float radius);
   // Apply damage to an asteroid.  May blow it up.
   void ApplyDamage(corgi::Entity, float damage);
+private:
+  void SpawnDebris(corgi::Entity source);
 };
 
 CORGI_REGISTER_SYSTEM(AsteroidSystem, AsteroidData)

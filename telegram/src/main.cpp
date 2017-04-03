@@ -44,7 +44,6 @@ int main(int argc, char* args[])
 
 			SDL_GLContext gl_context = SDL_GL_CreateContext(window);
 
-
 			// Once finished with OpenGL functions, the SDL_GLContext can be deleted.
 			//SDL_GL_DeleteContext(glcontext);
 
