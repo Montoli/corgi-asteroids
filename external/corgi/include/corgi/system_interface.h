@@ -27,6 +27,11 @@ namespace corgi {
 
 class EntityManager;
 
+enum AutoAddBehavior {
+  kAutoAdd,
+  kNoAutoAdd
+};
+
 /// @file
 /// @addtogroup corgi_component
 /// @{
@@ -127,13 +132,13 @@ public:
 	virtual void DeclareDependencies() = 0;
 
   /// @brief Declare a specific dependency on another system.
+  /// Provides data on order dependency, data access requirements,
+  /// and whether or not that component should be automatically
+  /// added to any entities this one is.
   virtual void DependOn(SystemId system_id,
                         SystemOrderDependencyType order_dependency,
-                        SystemAccessDependencyType access_dependency) = 0;
-
-  /// @brief Declare a component that is guaranteed to be on any entity
-  /// registered with this system.  (Will get auto-added on init.)
-  virtual void RequireComponent(SystemId system_id) = 0;
+                        SystemAccessDependencyType access_dependency,
+                        AutoAddBehavior auto_add_behavior) = 0;
 
   // todo: write desc
   virtual const std::unordered_map<SystemId, SystemAccessDependencyType>*

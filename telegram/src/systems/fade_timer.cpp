@@ -21,8 +21,8 @@ void FadeTimerSystem::UpdateAllEntities(corgi::WorldTime delta_time) {
 }
 
 void FadeTimerSystem::DeclareDependencies() {
-  DependOn<SpriteData>(corgi::kExecuteBefore, corgi::kReadWriteAccess);
-  RequireComponent<SpriteData>();
+  DependOn<SpriteData>(corgi::kExecuteBefore,
+      corgi::kReadWriteAccess, corgi::kAutoAdd);
   SetIsThreadSafe(true);
 }
 

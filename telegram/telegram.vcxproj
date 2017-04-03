@@ -146,7 +146,7 @@ xcopy /y /d  "$(ProjectDir)rsc\*" "$(OutDir)rsc"</Command>
     <ClCompile Include="src\math_common.cpp" />
     <ClCompile Include="src\states\main_state.cpp" />
     <ClCompile Include="src\states\state_manager.cpp" />
-    <ClCompile Include="src\systems\astroid.cpp" />
+    <ClCompile Include="src\systems\asteroid.cpp" />
     <ClCompile Include="src\systems\bullet.cpp" />
     <ClCompile Include="src\systems\common.cpp" />
     <ClCompile Include="src\systems\fade_timer.cpp" />

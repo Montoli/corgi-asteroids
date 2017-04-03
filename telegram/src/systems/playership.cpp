@@ -107,16 +107,17 @@ void PlayerShip::SpawnExhaust(corgi::Entity ship) {
 }
 
 void PlayerShip::DeclareDependencies() {
-	DependOn<SpriteSystem>(corgi::kExecuteBefore, corgi::kReadWriteAccess);
-  DependOn<PhysicsSystem>(corgi::kExecuteAfter, corgi::kReadWriteAccess);
-  DependOn<WallBounceSystem>(corgi::kNoOrderDependency, corgi::kReadAccess);
-  DependOn<TransformSystem>(corgi::kExecuteBefore, corgi::kReadWriteAccess);
+	DependOn<SpriteSystem>(corgi::kExecuteBefore,
+      corgi::kReadWriteAccess, corgi::kAutoAdd);
+  DependOn<PhysicsSystem>(corgi::kExecuteAfter,
+      corgi::kReadWriteAccess, corgi::kAutoAdd);
+  DependOn<WallBounceSystem>(corgi::kNoOrderDependency,
+      corgi::kReadAccess, corgi::kAutoAdd);
+  DependOn<TransformSystem>(corgi::kExecuteBefore,
+      corgi::kReadWriteAccess, corgi::kAutoAdd);
 
-  RequireComponent<SpriteSystem>();
-  RequireComponent<PhysicsSystem>();
-  RequireComponent<WallBounceSystem>();
-  RequireComponent<TransformSystem>();
-  DependOn<FadeTimerData>(corgi::kExecuteBefore, corgi::kReadWriteAccess);
+  DependOn<FadeTimerData>(corgi::kExecuteBefore,
+      corgi::kReadWriteAccess, corgi::kNoAutoAdd);
   SetIsThreadSafe(true);
 }
 

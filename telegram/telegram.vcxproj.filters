@@ -57,9 +57,6 @@
     <ClCompile Include="src\math_common.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\systems\astroid.cpp">
-      <Filter>Source Files\systems</Filter>
-    </ClCompile>
     <ClCompile Include="src\systems\wallbounce.cpp">
       <Filter>Source Files\systems</Filter>
     </ClCompile>
@@ -76,6 +73,9 @@
       <Filter>Source Files\systems</Filter>
     </ClCompile>
     <ClCompile Include="src\systems\bullet.cpp">
+      <Filter>Source Files\systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\systems\asteroid.cpp">
       <Filter>Source Files\systems</Filter>
     </ClCompile>
   </ItemGroup>

@@ -36,10 +36,10 @@ void WallBounceSystem::UpdateAllEntities(corgi::WorldTime delta_time) {
 }
 
 void WallBounceSystem::DeclareDependencies() {
-	DependOn<TransformSystem>(corgi::kExecuteBefore, corgi::kReadWriteAccess);
-	DependOn<PhysicsData>(corgi::kExecuteAfter, corgi::kReadWriteAccess);
-  RequireComponent<TransformSystem>();
-  RequireComponent<PhysicsData>();
+	DependOn<TransformSystem>(corgi::kExecuteBefore,
+      corgi::kReadWriteAccess, corgi::kAutoAdd);
+	DependOn<PhysicsData>(corgi::kExecuteAfter,
+      corgi::kReadWriteAccess, corgi::kAutoAdd);
 	SetIsThreadSafe(true);
 }
 

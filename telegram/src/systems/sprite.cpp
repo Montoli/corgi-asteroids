@@ -107,9 +107,11 @@ const char fShaderStr[] =
 "}";
 
 void SpriteSystem::DeclareDependencies() {
-  DependOn<TransformSystem>(corgi::kExecuteAfter, corgi::kReadAccess);
-	DependOn<CommonSystem>(corgi::kNoOrderDependency, corgi::kReadAccess);
-  RequireComponent<TransformSystem>();
+  DependOn<TransformSystem>(corgi::kExecuteAfter,
+      corgi::kReadAccess, corgi::kAutoAdd);
+
+	DependOn<CommonSystem>(corgi::kNoOrderDependency,
+      corgi::kReadAccess, corgi::kNoAutoAdd);
 
 	SetIsThreadSafe(true);
 }

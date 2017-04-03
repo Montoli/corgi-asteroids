@@ -28,16 +28,13 @@ void AsteroidSystem::UpdateAllEntities(corgi::WorldTime delta_time) {
 }
 
 void AsteroidSystem::DeclareDependencies() {
-	DependOn<SpriteSystem>(corgi::kExecuteBefore, corgi::kReadWriteAccess);
-	DependOn<TransformSystem>(corgi::kExecuteBefore, corgi::kReadWriteAccess);
-  DependOn<PhysicsSystem>(corgi::kExecuteAfter, corgi::kReadWriteAccess);
-  DependOn<WallBounceSystem>(corgi::kNoOrderDependency, corgi::kReadAccess);
-  DependOn<BulletSystem>(corgi::kExecuteAfter, corgi::kNoAccessDependency);
+	DependOn<SpriteSystem>(corgi::kExecuteBefore, corgi::kReadWriteAccess, corgi::kAutoAdd);
+	DependOn<TransformSystem>(corgi::kExecuteBefore, corgi::kReadWriteAccess, corgi::kAutoAdd);
+  DependOn<PhysicsSystem>(corgi::kExecuteAfter, corgi::kReadWriteAccess, corgi::kAutoAdd);
+  DependOn<WallBounceSystem>(corgi::kNoOrderDependency, corgi::kReadAccess, corgi::kAutoAdd);
 
-  RequireComponent<SpriteSystem>();
-  RequireComponent<TransformSystem>();
-  RequireComponent<PhysicsSystem>();
-  RequireComponent<WallBounceSystem>();
+  DependOn<BulletSystem>(corgi::kExecuteAfter, corgi::kNoAccessDependency, corgi::kNoAutoAdd);
+
   SetIsThreadSafe(true);
 }
 

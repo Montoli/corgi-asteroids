@@ -402,27 +402,15 @@ class System : public SystemInterface {
   /// dependencies they have on other systems, if any. (Via System::DependOn)
   virtual void DeclareDependencies() {}
 
-  /// @brief Declare a component that is guaranteed to be on any entity
-  /// registered with this system.  (Will get auto-added on init.)
-  virtual void RequireComponent(SystemId system_id) {
-    autoadd_systems_.insert(system_id);
-  }
-
-  /// @brief Declare a component that is guaranteed to be on any entity
-  /// registered with this system.  (Will get auto-added on init.)
-  template <typename SystemType>
-  void RequireComponent() {
-    RequireComponent(SystemIdLookup<SystemType>::system_id);
-  }
-
   /// @brief A utility function for declaring a dependency on another system.
   ///
   /// @tparam ComponentDataType The data type of the System to depend on.
   template <typename SystemType>
   void DependOn(SystemOrderDependencyType order_dependency,
-      SystemAccessDependencyType access_dependency) {
+      SystemAccessDependencyType access_dependency,
+      AutoAddBehavior auto_add_behavior) {
     DependOn(SystemIdLookup<SystemType>::system_id, order_dependency,
-        access_dependency);
+        access_dependency, auto_add_behavior);
   }
     
   /// @brief A utility function for declaring a dependency on another system.
@@ -433,8 +421,13 @@ class System : public SystemInterface {
     // we just add ourselves as a dependency to the target.  This way, the
     // dependency tree is entirely one-direction, with children referencing
     // their parents, but not vice versa.
-    SystemOrderDependencyType order_dependency,
-      SystemAccessDependencyType access_dependency) {
+      SystemOrderDependencyType order_dependency,
+      SystemAccessDependencyType access_dependency,
+      AutoAddBehavior auto_add_behavior) {
+
+    if (auto_add_behavior == kAutoAdd) {
+      autoadd_systems_.insert(system_id);
+    }
 
     if (order_dependency == kExecuteBefore) {
       assert(entity_manager_);
@@ -446,7 +439,7 @@ class System : public SystemInterface {
       // change it at all.  So this is a safe way to add an order dependency
       // without affecting anything else.
       system->DependOn(SystemIdLookup<T>::system_id,
-        kExecuteAfter, kNoAccessDependency);
+        kExecuteAfter, kNoAccessDependency, kNoAutoAdd);
     } else if (order_dependency == kExecuteAfter) {
       execute_dependencies_.insert(system_id);
     }

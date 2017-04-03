@@ -39,10 +39,10 @@ void BulletSystem::CheckForAsteroidHit(corgi::Entity asteroid_entity) {
   AsteroidData* asteroid = Data<AsteroidData>(asteroid_entity);
   TransformData* transform = Data<TransformData>(asteroid_entity);
   
-  int top    = (transform->position.y() - asteroid->radius) / kBucketSize;
-  int left   = (transform->position.x() - asteroid->radius) / kBucketSize;
-  int bottom = (transform->position.y() + asteroid->radius) / kBucketSize;
-  int right  = (transform->position.x() + asteroid->radius) / kBucketSize;
+  int top    = (int)(transform->position.y() - asteroid->radius) / kBucketSize;
+  int left   = (int)(transform->position.x() - asteroid->radius) / kBucketSize;
+  int bottom = (int)(transform->position.y() + asteroid->radius) / kBucketSize;
+  int right  = (int)(transform->position.x() + asteroid->radius) / kBucketSize;
 
   if (top < 0) top = 0;
   if (bottom >= kBucketRows) bottom = kBucketRows - 1;
@@ -82,15 +82,18 @@ void BulletSystem::CheckForAsteroidHit(corgi::Entity asteroid_entity) {
 
 
 void BulletSystem::DeclareDependencies() {
-	DependOn<SpriteSystem>(corgi::kExecuteBefore, corgi::kReadWriteAccess);
-	DependOn<TransformSystem>(corgi::kExecuteBefore, corgi::kReadWriteAccess);
-  DependOn<PhysicsSystem>(corgi::kExecuteAfter, corgi::kReadWriteAccess);
-  DependOn<AsteroidSystem>(corgi::kExecuteBefore, corgi::kReadWriteAccess);
-  DependOn<FadeTimerSystem>(corgi::kExecuteAfter, corgi::kReadWriteAccess);
+	DependOn<SpriteSystem>(corgi::kExecuteBefore,
+      corgi::kReadWriteAccess, corgi::kAutoAdd);
+	DependOn<TransformSystem>(corgi::kExecuteBefore,
+      corgi::kReadWriteAccess, corgi::kAutoAdd);
+  DependOn<PhysicsSystem>(corgi::kExecuteAfter,
+      corgi::kReadWriteAccess, corgi::kAutoAdd);
 
-  RequireComponent<SpriteSystem>();
-  RequireComponent<TransformSystem>();
-  RequireComponent<PhysicsSystem>();
+  DependOn<AsteroidSystem>(corgi::kExecuteBefore,
+      corgi::kReadWriteAccess, corgi::kNoAutoAdd);
+  DependOn<FadeTimerSystem>(corgi::kExecuteAfter,
+      corgi::kReadWriteAccess, corgi::kNoAutoAdd);
+
   SetIsThreadSafe(true);
 }
 
